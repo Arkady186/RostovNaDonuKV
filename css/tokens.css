@@ -1,0 +1,69 @@
+/* ============================================================
+   КВАДРАТ — Design Tokens
+   Premium editorial design · Warm minimalism · Natural materials
+   ============================================================ */
+
+:root {
+  /* Палитра */
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --text: #242722;
+  --text-2: #777970;
+  --text-3: #A3A59B;
+  --accent: #68735C;
+  --accent-2: #55604A;
+  --accent-soft: #EEF0EA;
+  --sand: #D8C8B2;
+  --sand-soft: #F2ECE2;
+  --border: #E7E4DD;
+  --border-strong: #D8D4C9;
+  --danger: #A34A3A;
+  --danger-soft: #F6E9E5;
+  --success: #5C7A5C;
+  --success-soft: #EAF0EA;
+
+  /* Типографика */
+  --font-display: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Геометрия */
+  --container: 1200px;
+  --container-narrow: 880px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+
+  /* Тени — сдержанные */
+  --shadow-sm: 0 1px 2px rgba(36, 39, 34, 0.05), 0 4px 14px rgba(36, 39, 34, 0.04);
+  --shadow-md: 0 2px 6px rgba(36, 39, 34, 0.05), 0 16px 40px rgba(36, 39, 34, 0.09);
+  --shadow-lg: 0 4px 12px rgba(36, 39, 34, 0.06), 0 28px 64px rgba(36, 39, 34, 0.12);
+
+  /* Отступы */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+  --space-11: 80px;
+  --space-12: 96px;
+
+  /* Анимации */
+  --t-fast: 0.16s ease;
+  --t: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Типографические размеры */
+  --fs-hero: clamp(2.1rem, 4.6vw, 3.6rem);
+  --fs-h1: clamp(1.8rem, 3.4vw, 2.6rem);
+  --fs-h2: clamp(1.45rem, 2.6vw, 2rem);
+  --fs-h3: clamp(1.15rem, 1.8vw, 1.4rem);
+  --fs-body: 1rem;
+  --fs-sm: 0.9rem;
+  --fs-xs: 0.8rem;
+  --lh-tight: 1.18;
+  --lh-body: 1.62;
+}

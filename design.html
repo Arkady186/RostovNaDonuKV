@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дизайн-проект — КВАДРАТ</title>
+  <meta name="description" content="Страница дизайн-проекта: галерея, палитра, материалы и переход к конфигуратору.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <div id="design-head"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--2" style="align-items:start;gap:var(--space-9)">
+          <div>
+            <div class="gallery" id="design-gallery"></div>
+          </div>
+          <div>
+            <div class="section__eyebrow">О направлении</div>
+            <h2 class="section__title" id="design-title"></h2>
+            <p class="section__sub" id="design-desc" style="margin-top:var(--space-4)"></p>
+
+            <div style="margin-top:var(--space-6)">
+              <div class="filter-bar__label" style="margin-bottom:var(--space-3)">Палитра</div>
+              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap" id="design-palette"></div>
+            </div>
+
+            <div style="margin-top:var(--space-6)">
+              <div class="filter-bar__label" style="margin-bottom:var(--space-3)">Материалы</div>
+              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap" id="design-materials"></div>
+            </div>
+
+            <div class="grid grid--2" style="margin-top:var(--space-6);gap:var(--space-4)" id="design-stats"></div>
+
+            <div class="hero__actions" style="margin-top:var(--space-7)">
+              <a class="btn btn--primary btn--lg" id="design-cta" href="#">Выбрать этот дизайн</a>
+              <button class="btn btn--secondary btn--lg" id="design-fav" type="button">В избранное</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight section--alt">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Другие проекты</div>
+            <h2 class="section__title">Похожие направления</h2>
+          </div>
+        </div>
+        <div class="grid grid--auto" id="design-others"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'design';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const slug = UI.getParam('slug');
+      const design = catalog.designs.find((d) => d.slug === slug && d.published);
+
+      if (!design) {
+        document.getElementById('design-head').innerHTML =
+          '<h1 class="page-hero__title">Дизайн-проект не найден</h1>' +
+          '<p class="page-hero__sub">Возможно, запись была скрыта или удалена.</p>';
+        document.getElementById('design-gallery').innerHTML =
+          UI.emptyState('Ничего не найдено', 'Вернитесь в каталог дизайн-проектов.', '<a class="btn btn--primary" href="designs.html">К каталогу</a>');
+        return;
+      }
+
+      const pkgLabels = { base: 'Базовая', comfort: 'Комфорт', premium: 'Премиум' };
+      document.title = `${design.name} — дизайн-проект — КВАДРАТ`;
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Дизайн-проекты', href: 'designs.html' },
+        { label: design.name },
+      ]);
+
+      document.getElementById('design-head').innerHTML = `
+        <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-5)">
+          <h1 class="page-hero__title" style="margin-top:0">${UI.escapeHtml(design.name)}</h1>
+          <span class="badge badge--sand">${UI.escapeHtml(design.style)}</span>
+          <span class="badge badge--outline">${UI.escapeHtml(design.priceLevel)}</span>
+        </div>`;
+
+      /* Галерея */
+      const galleryEl = document.getElementById('design-gallery');
+      const images = design.gallery && design.gallery.length ? design.gallery : [design.image];
+      galleryEl.innerHTML = `
+        <div class="gallery__main"><img id="gallery-main" src="${images[0]}" alt="${UI.escapeHtml(design.name)}"></div>
+        <div class="gallery__thumbs">
+          ${images.map((src, i) => `<button class="gallery__thumb ${i === 0 ? 'is-active' : ''}" data-src="${src}" aria-label="Фото ${i + 1}"><img src="${src}" alt="" loading="lazy"></button>`).join('')}
+        </div>`;
+      UI.qsa('.gallery__thumb', galleryEl).forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          UI.qsa('.gallery__thumb', galleryEl).forEach((t) => t.classList.remove('is-active'));
+          thumb.classList.add('is-active');
+          document.getElementById('gallery-main').src = thumb.dataset.src;
+        });
+      });
+
+      document.getElementById('design-title').textContent = design.name;
+      document.getElementById('design-desc').textContent = design.description;
+
+      document.getElementById('design-palette').innerHTML = design.palette
+        .map((c) => `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-2)">
+            <span style="width:44px;height:44px;border-radius:12px;background:${c};border:1px solid var(--border);display:block" title="${c}"></span>
+            <span style="font-size:11px;color:var(--text-3)">${c}</span>
+          </div>`)
+        .join('');
+
+      document.getElementById('design-materials').innerHTML = design.materials
+        .map((m) => `<span class="tag">${UI.escapeHtml(m)}</span>`)
+        .join('');
+
+      document.getElementById('design-stats').innerHTML = [
+        { l: 'Стиль', v: design.style },
+        { l: 'Комплектация', v: pkgLabels[design.packageLevel] || design.packageLevel },
+        { l: 'Ценовой уровень', v: design.priceLevel },
+        { l: 'Подходит для', v: (design.suitableTypes || []).map((t) => APARTMENT_TYPES[t].short).join(', ') },
+      ]
+        .map((s) => `<div class="estimate__meta-item"><div class="estimate__meta-label">${UI.escapeHtml(s.l)}</div><div class="estimate__meta-value">${UI.escapeHtml(s.v)}</div></div>`)
+        .join('');
+
+      document.getElementById('design-cta').href = `configurator.html?design=${design.slug}`;
+
+      const favBtn = document.getElementById('design-fav');
+      function updateFav() {
+        const active = Store.isFavorite('designs', design.id);
+        favBtn.textContent = active ? 'В избранном ♥' : 'В избранное';
+        favBtn.classList.toggle('btn--danger', active);
+      }
+      updateFav();
+      favBtn.addEventListener('click', () => {
+        Store.toggleFavorite('designs', design.id);
+        updateFav();
+        UI.updateFavoritesBadge();
+        UI.toast(Store.isFavorite('designs', design.id) ? 'Добавлено в избранное' : 'Удалено из избранного');
+      });
+
+      /* Похожие */
+      const others = catalog.designs.filter((d) => d.published && d.id !== design.id).slice(0, 3);
+      document.getElementById('design-others').innerHTML = others
+        .map((d) => `
+          <article class="card card--link">
+            <div class="card__media">
+              <img class="card__img" src="${d.image}" alt="${UI.escapeHtml(d.name)}" loading="lazy">
+            </div>
+            <div class="card__body">
+              <h3 class="card__title"><a href="design.html?slug=${d.slug}">${UI.escapeHtml(d.name)}</a></h3>
+              <div class="card__meta">
+                <span class="tag">${UI.escapeHtml(d.style)}</span>
+                <span class="tag">${UI.escapeHtml(d.priceLevel)}</span>
+              </div>
+              <div class="card__footer">
+                <a class="btn btn--secondary btn--sm" href="configurator.html?design=${d.slug}">Выбрать</a>
+              </div>
+            </div>
+          </article>`)
+        .join('');
+    });
+  </script>
+</body>
+</html>

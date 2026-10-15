@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квартира — КВАДРАТ</title>
+  <meta name="description" content="Планировка квартиры, параметры и предварительная стоимость ремонта.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <div id="apt-head"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--2" style="align-items:start;gap:var(--space-9)">
+          <div id="apt-plan"></div>
+          <div>
+            <div class="section__eyebrow">Параметры</div>
+            <h2 class="section__title" id="apt-title"></h2>
+            <p class="section__sub" id="apt-desc" style="margin-top:var(--space-4)"></p>
+            <div class="grid grid--2" style="margin-top:var(--space-6);gap:var(--space-4)" id="apt-stats"></div>
+            <div class="estimate__meta" style="grid-template-columns:1fr;margin-top:var(--space-6)">
+              <div class="estimate__meta-item">
+                <div class="estimate__meta-label">Предварительная стоимость ремонта (комплектация «Комфорт»)</div>
+                <div class="estimate__meta-value" id="apt-price" style="font-size:1.5rem"></div>
+              </div>
+            </div>
+            <div class="hero__actions" style="margin-top:var(--space-6)">
+              <a class="btn btn--primary btn--lg" id="apt-cta" href="#">Подобрать дизайн</a>
+              <button class="btn btn--secondary btn--lg" id="apt-fav" type="button">В избранное</button>
+            </div>
+            <div class="notice" style="margin-top:var(--space-6)">
+              <span class="notice__mark">i</span>
+              <span>Планировка и площадь — демонстрационные. Стоимость рассчитана по демонстрационной модели и носит информационный характер.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight section--alt">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Дизайн-проекты</div>
+            <h2 class="section__title">Подходящие направления для этой квартиры</h2>
+          </div>
+        </div>
+        <div class="grid grid--auto" id="apt-designs"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'apartment';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const complexSlug = UI.getParam('complex');
+      const id = UI.getParam('id');
+      const complex = catalog.complexes.find((c) => c.slug === complexSlug && c.published);
+      const apartment = catalog.apartments.find((a) => a.id === id && a.published);
+
+      if (!complex || !apartment) {
+        document.getElementById('apt-head').innerHTML =
+          '<h1 class="page-hero__title">Квартира не найдена</h1>' +
+          '<p class="page-hero__sub">Возможно, запись была скрыта или удалена.</p>';
+        document.getElementById('apt-plan').innerHTML =
+          UI.emptyState('Ничего не найдено', 'Вернитесь к планировкам жилого комплекса.', '<a class="btn btn--primary" href="complexes.html">К каталогу</a>');
+        return;
+      }
+
+      const info = APARTMENT_TYPES[apartment.type];
+      const dev = catalog.developers.find((d) => d.id === complex.developerId);
+      document.title = `${info.label} ${apartment.area} м² — ЖК «${complex.name}» — КВАДРАТ`;
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Жилые комплексы', href: 'complexes.html' },
+        { label: complex.name, href: `complex.html?slug=${complex.slug}` },
+        { label: 'Квартиры', href: `apartments.html?complex=${complex.slug}` },
+        { label: `${info.label} · ${apartment.area} м²` },
+      ]);
+
+      document.getElementById('apt-head').innerHTML = `
+        <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-5)">
+          <h1 class="page-hero__title" style="margin-top:0">${info.label} · ${apartment.area} м²</h1>
+          <span class="badge badge--sand">ЖК «${UI.escapeHtml(complex.name)}»</span>
+          <span class="badge badge--outline">${UI.escapeHtml(dev ? dev.name : '')}</span>
+        </div>`;
+
+      UI.renderPlan(apartment, document.getElementById('apt-plan'));
+
+      document.getElementById('apt-title').textContent = `${info.label} · ${apartment.area} м²`;
+      document.getElementById('apt-desc').textContent = apartment.description;
+
+      document.getElementById('apt-stats').innerHTML = [
+        { l: 'Тип', v: info.label },
+        { l: 'Площадь', v: apartment.area + ' м²' },
+        { l: 'Комнат', v: String(apartment.rooms) },
+        { l: 'Жилой комплекс', v: complex.name },
+      ]
+        .map((s) => `<div class="estimate__meta-item"><div class="estimate__meta-label">${UI.escapeHtml(s.l)}</div><div class="estimate__meta-value">${UI.escapeHtml(s.v)}</div></div>`)
+        .join('');
+
+      const cfg = { ...Store.getConfig(), complexId: complex.id, apartmentId: apartment.id, packageId: 'pkg-comfort' };
+      const est = Estimate.calculate(cfg);
+      document.getElementById('apt-price').textContent = est ? UI.formatMoney(est.total) : '—';
+
+      const cfgUrl = `configurator.html?complex=${complex.slug}&apartment=${apartment.id}`;
+      document.getElementById('apt-cta').href = cfgUrl;
+
+      const favBtn = document.getElementById('apt-fav');
+      function updateFav() {
+        const active = Store.isFavorite('apartments', apartment.id);
+        favBtn.textContent = active ? 'В избранном ♥' : 'В избранное';
+        favBtn.classList.toggle('btn--danger', active);
+      }
+      updateFav();
+      favBtn.addEventListener('click', () => {
+        Store.toggleFavorite('apartments', apartment.id);
+        updateFav();
+        UI.updateFavoritesBadge();
+        UI.toast(Store.isFavorite('apartments', apartment.id) ? 'Добавлено в избранное' : 'Удалено из избранного');
+      });
+
+      /* Подходящие дизайны */
+      const suitable = catalog.designs.filter((d) => d.published && (d.suitableTypes || []).includes(apartment.type));
+      const designs = suitable.length ? suitable : catalog.designs.filter((d) => d.published).slice(0, 3);
+      document.getElementById('apt-designs').innerHTML = designs
+        .map((d) => `
+          <article class="card card--link">
+            <div class="card__media">
+              <img class="card__img" src="${d.image}" alt="${UI.escapeHtml(d.name)}" loading="lazy">
+            </div>
+            <div class="card__body">
+              <h3 class="card__title"><a href="design.html?slug=${d.slug}">${UI.escapeHtml(d.name)}</a></h3>
+              <div class="card__meta">
+                <span class="tag">${UI.escapeHtml(d.style)}</span>
+                <span class="tag">${UI.escapeHtml(d.priceLevel)}</span>
+              </div>
+              <div class="card__footer">
+                <a class="btn btn--secondary btn--sm" href="${cfgUrl}&design=${d.slug}">Выбрать этот дизайн</a>
+              </div>
+            </div>
+          </article>`)
+        .join('');
+    });
+  </script>
+</body>
+</html>

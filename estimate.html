@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Предварительная смета — КВАДРАТ</title>
+  <meta name="description" content="Предварительная смета ремонта: разбивка по работам, материалам, кухне и опциям.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Предварительная смета</h1>
+        <p class="page-hero__sub">
+          Разбивка по группам расходов, итоговая сумма, стоимость за квадратный метр
+          и ориентировочные сроки.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div id="estimate-root"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'estimate';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const config = Store.getConfig();
+      const est = Estimate.calculate(config);
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Смета' },
+      ]);
+
+      const root = document.getElementById('estimate-root');
+
+      if (!est) {
+        root.innerHTML = UI.emptyState(
+          'Смета пока не сформирована',
+          'Пройдите конфигуратор: выберите квартиру, дизайн и комплектацию — смета появится автоматически.',
+          '<a class="btn btn--primary" href="configurator.html">Открыть конфигуратор</a>'
+        );
+        return;
+      }
+
+      const complex = catalog.complexes.find((c) => c.id === config.complexId);
+      const design = catalog.designs.find((d) => d.id === config.designId);
+      const kitchen = catalog.kitchens.find((k) => k.id === config.kitchenId);
+
+      /* Сводка выбора */
+      const summaryRows = [
+        { l: 'Жилой комплекс', v: complex ? complex.name : '—' },
+         { l: 'Квартира / площадь', v: config.apartmentId === 'custom-area' ? `Расчёт по введённой площади · ${est.apartment.area} м² (без плана)` : `${APARTMENT_TYPES[est.apartment.type].label} · ${est.apartment.area} м²` },
+        { l: 'Дизайн-проект', v: design ? design.name : '—' },
+        { l: 'Комплектация', v: est.pkg.name },
+        { l: 'Кухня', v: kitchen ? kitchen.name : '—' },
+        { l: 'Дополнительные опции', v: (config.options || []).length ? String(config.options.length) : '—' },
+      ];
+
+      /* Материалы */
+      const materialRows = MATERIAL_CATEGORIES.map((cat) => {
+        const mat = catalog.materials.find((m) => m.id === config.materials[cat.key]);
+        return { l: cat.label, v: mat ? mat.name : '—' };
+      });
+
+      let html = `
+        <div class="grid grid--2" style="align-items:start;gap:var(--space-7);margin-bottom:var(--space-7)">
+          <div>
+            <div class="section__eyebrow">Ваш выбор</div>
+            <div class="summary-list">${summaryRows
+              .map((r) => `<div class="summary-list__row"><span>${r.l}</span><span>${UI.escapeHtml(r.v)}</span></div>`)
+              .join('')}</div>
+          </div>
+          <div>
+            <div class="section__eyebrow">Материалы</div>
+            <div class="summary-list">${materialRows
+              .map((r) => `<div class="summary-list__row"><span>${r.l}</span><span>${UI.escapeHtml(r.v)}</span></div>`)
+              .join('')}</div>
+          </div>
+        </div>
+
+        ${config.apartmentId === 'custom-area' ? `<div class="notice" style="margin-bottom:var(--space-6)"><span class="notice__mark">i</span><span>Смета рассчитана по введённой площади, без подтверждённой планировки конкретной квартиры. Ставки материалов и работ в прототипе демонстрационные и должны быть подтверждены перед коммерческим использованием.</span></div>` : ''}
+
+        <div class="estimate">
+          <div class="estimate__head">
+            <div>
+              <div class="estimate__meta-label">Предварительная смета ремонта</div>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem">${UI.escapeHtml(est.apartment ? APARTMENT_TYPES[est.apartment.type].label + ' · ' + est.apartment.area + ' м²' : '')} · ${UI.escapeHtml(est.pkg.name)}</div>
+            </div>
+            <div class="no-print" style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+              <button class="btn btn--secondary btn--sm" id="est-print" type="button">Печать</button>
+              <a class="btn btn--secondary btn--sm" href="configurator.html?step=1">Изменить расчёт</a>
+              <a class="btn btn--primary btn--sm" href="request.html">Оформить заявку</a>
+            </div>
+          </div>
+          <div class="estimate__body">`;
+
+      for (const g of est.groups) {
+        html += `<div class="estimate__group">
+          <div class="estimate__group-title">${UI.escapeHtml(g.group)}</div>`;
+        for (const r of g.rows) {
+          html += `<div class="estimate__row ${r.included ? 'estimate__row--included' : ''}">
+            <div class="estimate__row-name">${UI.escapeHtml(r.label)}${r.note ? `<span class="estimate__row-note">${UI.escapeHtml(r.note)}</span>` : ''}</div>
+            <div class="estimate__row-value">${r.included ? 'включено' : UI.formatMoney(r.value)}</div>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+
+      html += `
+            <div class="estimate__row estimate__row--total">
+              <div class="estimate__row-name">Итоговая стоимость</div>
+              <div class="estimate__row-value">${UI.formatMoney(est.total)}</div>
+            </div>
+            <div class="estimate__meta">
+              <div class="estimate__meta-item"><div class="estimate__meta-label">Стоимость за м²</div><div class="estimate__meta-value">${UI.formatMoney(est.perM2)}</div></div>
+              <div class="estimate__meta-item"><div class="estimate__meta-label">Ориентировочный срок</div><div class="estimate__meta-value">${est.durationText}</div></div>
+              <div class="estimate__meta-item"><div class="estimate__meta-label">Площадь</div><div class="estimate__meta-value">${est.area} м²</div></div>
+            </div>
+            <p class="estimate__disclaimer">Предварительный расчёт носит информационный характер. Финальная стоимость и сроки определяются после уточнения параметров объекта и согласования состава работ.</p>
+          </div>
+        </div>`;
+
+      root.innerHTML = html;
+
+      document.getElementById('est-print').addEventListener('click', () => window.print());
+    });
+  </script>
+</body>
+</html>

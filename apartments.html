@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квартиры в ЖК — КВАДРАТ</title>
+  <meta name="description" content="Каталог квартир с фильтрами по типу и площади.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title" id="apts-title">Квартиры</h1>
+        <p class="page-hero__sub" id="apts-sub">
+          Здесь отображаются только планировки, подтверждённые источником. Если каталог пуст, откройте официальный сайт застройщика — мы не подменяем реальные планы нарисованными схемами.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="filter-bar">
+          <div class="filter-bar__group">
+            <span class="filter-bar__label">Тип квартиры</span>
+            <div class="chips" id="apt-type-chips"></div>
+          </div>
+          <div class="filter-bar__group">
+            <label class="filter-bar__label" for="apt-area-min">Площадь, м²</label>
+            <div style="display:flex;gap:var(--space-2);align-items:center">
+              <input class="input" id="apt-area-min" type="number" min="15" max="100" placeholder="от" style="max-width:90px">
+              <span style="color:var(--text-3)">—</span>
+              <input class="input" id="apt-area-max" type="number" min="15" max="100" placeholder="до" style="max-width:90px">
+            </div>
+          </div>
+        </div>
+        <div class="grid grid--auto" id="apts-grid"></div>
+        <div id="apts-empty" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'apartments';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const complexSlug = UI.getParam('complex');
+      const complex = catalog.complexes.find((c) => c.slug === complexSlug && c.published);
+
+      if (!complex) {
+        document.getElementById('apts-grid').innerHTML =
+          UI.emptyState('Жилой комплекс не найден', 'Вернитесь в каталог.', '<a class="btn btn--primary" href="complexes.html">К каталогу</a>');
+        return;
+      }
+
+      const dev = catalog.developers.find((d) => d.id === complex.developerId);
+      document.title = `Квартиры в ЖК «${complex.name}» — КВАДРАТ`;
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Жилые комплексы', href: 'complexes.html' },
+        { label: complex.name, href: `complex.html?slug=${complex.slug}` },
+        { label: 'Квартиры' },
+      ]);
+      document.getElementById('apts-title').textContent = `Квартиры в ЖК «${complex.name}»`;
+      document.getElementById('apts-sub').textContent =
+        `${dev ? dev.name + ' · ' : ''}${complex.class} класс. Демонстрационные планировки, площади ориентировочные.`;
+
+      const all = catalog.apartments.filter((a) => a.complexId === complex.id && a.published);
+      const chipsEl = document.getElementById('apt-type-chips');
+      const grid = document.getElementById('apts-grid');
+      const emptyEl = document.getElementById('apts-empty');
+      const minEl = document.getElementById('apt-area-min');
+      const maxEl = document.getElementById('apt-area-max');
+
+      let typeFilter = '';
+      let minArea = 0;
+      let maxArea = 999;
+
+      chipsEl.innerHTML =
+        `<button class="chip is-active" data-type="">Все типы</button>` +
+        Object.keys(APARTMENT_TYPES)
+          .map((t) => `<button class="chip" data-type="${t}">${APARTMENT_TYPES[t].label}</button>`)
+          .join('');
+
+      chipsEl.addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        UI.qsa('.chip', chipsEl).forEach((c) => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        typeFilter = chip.dataset.type;
+        render();
+      });
+
+      minEl.addEventListener('input', () => { minArea = Number(minEl.value) || 0; render(); });
+      maxEl.addEventListener('input', () => { maxArea = Number(maxEl.value) || 999; render(); });
+
+      function render() {
+        const list = all.filter((a) => {
+          if (typeFilter && a.type !== typeFilter) return false;
+          if (a.area < minArea || a.area > maxArea) return false;
+          return true;
+        });
+
+        if (!list.length) {
+          grid.innerHTML = '';
+          emptyEl.hidden = false;
+          const official = complex.sourceUrl ? `<a class="btn btn--primary btn--sm" href="${complex.sourceUrl}" target="_blank" rel="noopener noreferrer">Посмотреть реальные варианты у застройщика ↗</a>` : '';
+          emptyEl.innerHTML = UI.emptyState('Проверенные планировки пока не импортированы', 'Мы скрыли условные площади и нарисованные схемы из исходного шаблона. Чтобы увидеть актуальные варианты, перейдите на официальный сайт застройщика.', official);
+          return;
+        }
+        emptyEl.hidden = true;
+
+        grid.innerHTML = list
+          .map((a) => {
+            const info = APARTMENT_TYPES[a.type];
+            const cfg = { ...Store.getConfig(), complexId: complex.id, apartmentId: a.id, packageId: Store.getConfig().packageId || 'pkg-comfort' };
+            const est = Estimate.calculate(cfg);
+            return `
+            <article class="card card--link">
+              <div class="card__body">
+                <div class="card__meta">
+                  <span class="badge badge--sand">${info.label}</span>
+                  <span class="tag">${a.area} м²</span>
+                  <span class="tag">${a.rooms} комн.</span>
+                </div>
+                <h2 class="card__title"><a href="apartment.html?complex=${complex.slug}&id=${a.id}">${info.label} · ${a.area} м²</a></h2>
+                <p class="card__text">${UI.escapeHtml(a.description)}</p>
+                <div class="card__footer">
+                  <div>
+                    <span class="price__label">Ремонт от</span>
+                    <span class="price">${est ? UI.formatMoney(est.total) : '—'}</span>
+                  </div>
+                  <a class="btn btn--primary btn--sm" href="apartment.html?complex=${complex.slug}&id=${a.id}">Выбрать</a>
+                </div>
+              </div>
+            </article>`;
+          })
+          .join('');
+      }
+
+      render();
+    });
+  </script>
+</body>
+</html>

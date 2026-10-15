@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дизайн-проекты — КВАДРАТ</title>
+  <meta name="description" content="Каталог дизайн-проектов интерьера: Soft Minimal, Scandinavian, Contemporary, Warm Modern, Modern Classic, Urban Calm.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Дизайн-проекты</h1>
+        <p class="page-hero__sub">
+          Шесть проработанных направлений: палитра, материалы, подходящие типы квартир
+          и ориентировочный уровень бюджета.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="filter-bar">
+          <div class="filter-bar__group">
+            <span class="filter-bar__label">Стиль</span>
+            <div class="chips" id="ds-style-chips"></div>
+          </div>
+          <div class="filter-bar__group">
+            <span class="filter-bar__label">Тип квартиры</span>
+            <div class="chips" id="ds-type-chips"></div>
+          </div>
+          <div class="filter-bar__group">
+            <span class="filter-bar__label">Комплектация</span>
+            <div class="chips" id="ds-pkg-chips"></div>
+          </div>
+        </div>
+        <div class="grid grid--auto" id="designs-grid"></div>
+        <div id="designs-empty" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'designs';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const all = catalog.designs.filter((d) => d.published);
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Дизайн-проекты' },
+      ]);
+
+      const styleChips = document.getElementById('ds-style-chips');
+      const typeChips = document.getElementById('ds-type-chips');
+      const pkgChips = document.getElementById('ds-pkg-chips');
+      const grid = document.getElementById('designs-grid');
+      const emptyEl = document.getElementById('designs-empty');
+
+      const styles = [...new Set(all.map((d) => d.style))];
+      const pkgLabels = { base: 'Базовая', comfort: 'Комфорт', premium: 'Премиум' };
+
+      let styleFilter = '';
+      let typeFilter = '';
+      let pkgFilter = '';
+
+      styleChips.innerHTML =
+        `<button class="chip is-active" data-v="">Все стили</button>` +
+        styles.map((s) => `<button class="chip" data-v="${UI.escapeHtml(s)}">${UI.escapeHtml(s)}</button>`).join('');
+
+      typeChips.innerHTML =
+        `<button class="chip is-active" data-v="">Любая</button>` +
+        Object.keys(APARTMENT_TYPES)
+          .map((t) => `<button class="chip" data-v="${t}">${APARTMENT_TYPES[t].label}</button>`)
+          .join('');
+
+      pkgChips.innerHTML =
+        `<button class="chip is-active" data-v="">Любая</button>` +
+        Object.keys(pkgLabels)
+          .map((p) => `<button class="chip" data-v="${p}">${pkgLabels[p]}</button>`)
+          .join('');
+
+      function bindChips(el, cb) {
+        el.addEventListener('click', (e) => {
+          const chip = e.target.closest('.chip');
+          if (!chip) return;
+          UI.qsa('.chip', el).forEach((c) => c.classList.remove('is-active'));
+          chip.classList.add('is-active');
+          cb(chip.dataset.v);
+        });
+      }
+
+      bindChips(styleChips, (v) => { styleFilter = v; render(); });
+      bindChips(typeChips, (v) => { typeFilter = v; render(); });
+      bindChips(pkgChips, (v) => { pkgFilter = v; render(); });
+
+      function render() {
+        const list = all.filter((d) => {
+          if (styleFilter && d.style !== styleFilter) return false;
+          if (typeFilter && !(d.suitableTypes || []).includes(typeFilter)) return false;
+          if (pkgFilter && d.packageLevel !== pkgFilter) return false;
+          return true;
+        });
+
+        if (!list.length) {
+          grid.innerHTML = '';
+          emptyEl.hidden = false;
+          emptyEl.innerHTML = UI.emptyState('Ничего не найдено', 'Попробуйте изменить фильтры.');
+          return;
+        }
+        emptyEl.hidden = true;
+
+        grid.innerHTML = list
+          .map((d) => `
+            <article class="card card--link">
+              <div class="card__media">
+                <img class="card__img" src="${d.image}" alt="${UI.escapeHtml(d.name)}" loading="lazy">
+                <button class="card__fav ${Store.isFavorite('designs', d.id) ? 'is-active' : ''}" data-fav="designs" data-id="${d.id}" aria-label="В избранное">♡</button>
+              </div>
+              <div class="card__body">
+                <h2 class="card__title"><a href="design.html?slug=${d.slug}">${UI.escapeHtml(d.name)}</a></h2>
+                <div class="card__meta">
+                  <span class="tag">${UI.escapeHtml(d.style)}</span>
+                  <span class="tag">${UI.escapeHtml(d.priceLevel)}</span>
+                  <span class="tag">${pkgLabels[d.packageLevel] || d.packageLevel}</span>
+                </div>
+                <p class="card__text">${UI.escapeHtml(d.description.slice(0, 110))}…</p>
+                <div class="card__footer">
+                  <a class="btn btn--primary btn--sm" href="configurator.html?design=${d.slug}">Выбрать этот дизайн</a>
+                </div>
+              </div>
+            </article>`)
+          .join('');
+      }
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-fav]');
+        if (!btn) return;
+        const added = Store.toggleFavorite(btn.dataset.fav, btn.dataset.id);
+        btn.classList.toggle('is-active', added);
+        UI.updateFavoritesBadge();
+        UI.toast(added ? 'Добавлено в избранное' : 'Удалено из избранного');
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>

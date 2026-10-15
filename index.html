@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>КВАДРАТ — дизайн и ремонт новостроек в Ростове-на-Дону</title>
+  <meta name="description" content="Выберите жилой комплекс, найдите свою планировку и соберите интерьер с предварительным расчётом стоимости ремонта.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <!-- Первый экран -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero__grid">
+          <div class="hero__content">
+            <div class="hero__eyebrow">Дизайн и ремонт новостроек</div>
+            <h1 class="hero__title">Квартира, в которой всё на своём месте</h1>
+            <p class="hero__sub">
+              Выберите жилой комплекс, найдите свою планировку и соберите интерьер
+              с предварительным расчётом стоимости.
+            </p>
+            <div class="hero__actions">
+              <a class="btn btn--primary btn--lg" href="configurator.html">Подобрать ремонт</a>
+              <a class="btn btn--secondary btn--lg" href="designs.html">Смотреть проекты</a>
+            </div>
+
+            <!-- Быстрый выбор -->
+            <div class="quick-select" id="quick-select">
+              <div class="field">
+                <label class="quick-select__label" for="qs-city">Город</label>
+                <select class="select" id="qs-city"></select>
+              </div>
+              <div class="field">
+                <label class="quick-select__label" for="qs-developer">Застройщик</label>
+                <select class="select" id="qs-developer"></select>
+              </div>
+              <div class="field">
+                <label class="quick-select__label" for="qs-complex">Жилой комплекс</label>
+                <select class="select" id="qs-complex"></select>
+              </div>
+              <button class="btn btn--primary" id="qs-go" type="button">Выбрать квартиру</button>
+            </div>
+          </div>
+          <div class="hero__media">
+            <img class="hero__img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80"
+                 alt="Современная кухня-гостиная в тёплых натуральных оттенках" loading="eager">
+            <div class="hero__media-note">
+              Интерьерный референс Warm Modern. Не фотография конкретной квартиры или ЖК.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Подборка жилых комплексов -->
+    <section class="section section--tight" id="complexes">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Каталог</div>
+            <h2 class="section__title">Жилые комплексы Ростова-на-Дону</h2>
+            <p class="section__sub">Каталог с первоисточниками застройщиков. Реальные планировки добавляются только после проверки; интерьерные изображения помечены отдельно.</p>
+          </div>
+          <a class="btn btn--secondary section__action" href="complexes.html">Весь каталог</a>
+        </div>
+        <div class="grid grid--auto" id="home-complexes"></div>
+      </div>
+    </section>
+
+    <!-- Октябрь Парк -->
+    <section class="section section--alt" id="oktyabr-park">
+      <div class="container">
+        <div class="grid grid--2" style="align-items:center;gap:var(--space-9)">
+          <div>
+            <img src="https://img1.creatium.ru/disk2/2a/3b/da/03faf78067ece3d201384444331345e52f/01jn0qz7z45vma0s99zhbw0gzc.jpg"
+                 alt="Визуализация ЖК «Октябрь Парк» с официального сайта проекта" style="border-radius:var(--radius);aspect-ratio:4/3;object-fit:cover;width:100%;box-shadow:var(--shadow-md)" loading="lazy">
+            <p class="source-note">Визуализация с официальной страницы проекта · <a href="https://oktyabrskiipark.ru/" target="_blank" rel="noopener noreferrer">источник ↗</a></p>
+          </div>
+          <div>
+            <div class="section__eyebrow">Приоритетный объект</div>
+            <h2 class="section__title">ЖК «Октябрь Парк»</h2>
+            <p class="section__sub" style="margin-top:var(--space-4)">
+              Жилой комплекс комфорт+ от ССК по адресу ул. Таганрогская, 132/4. Актуальные корпуса, планировки и цены проверяйте на официальном сайте застройщика. После загрузки подтверждённой планировки можно будет рассчитать ремонт.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-5)">
+              <span class="badge badge--sand">Комфорт+</span>
+              <span class="badge badge--outline">ССК</span>
+              <span class="badge badge--outline">Ростов-на-Дону</span>
+              <a class="badge badge--outline" href="https://oktyabrskiipark.ru/" target="_blank" rel="noopener noreferrer">Официальный сайт ЖК ↗</a>
+            </div>
+            <div class="hero__actions">
+              <a class="btn btn--primary" href="https://oktyabrskiipark.ru/" target="_blank" rel="noopener noreferrer">Проверить квартиры у застройщика ↗</a>
+              <a class="btn btn--secondary" href="complex.html?slug=oktyabr-park">Подробнее о ЖК</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Категории квартир -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Планировки</div>
+            <h2 class="section__title">Категории квартир</h2>
+            <p class="section__sub">От компактной студии до просторной трёхкомнатной — для каждой категории есть демонстрационные планировки.</p>
+          </div>
+        </div>
+        <div class="grid grid--auto-sm" id="home-types"></div>
+      </div>
+    </section>
+
+    <!-- Дизайн-проекты -->
+    <section class="section section--tight" id="designs">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Дизайн-проекты</div>
+            <h2 class="section__title">Готовые направления интерьера</h2>
+            <p class="section__sub">Шесть проработанных стилей с палитрами, материалами и ориентировочным уровнем бюджета.</p>
+          </div>
+          <a class="btn btn--secondary section__action" href="designs.html">Все проекты</a>
+        </div>
+        <div class="grid grid--auto" id="home-designs"></div>
+      </div>
+    </section>
+
+    <!-- Как это работает -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Процесс</div>
+            <h2 class="section__title">Четыре шага до предварительной сметы</h2>
+          </div>
+          <a class="btn btn--secondary section__action" href="how-it-works.html">Подробнее</a>
+        </div>
+        <div class="grid grid--4" id="home-steps"></div>
+      </div>
+    </section>
+
+    <!-- Преимущества сметы -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Прозрачность</div>
+            <h2 class="section__title">Почему предварительная смета полезна</h2>
+          </div>
+        </div>
+        <div class="grid grid--2" id="home-benefits"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section--tight">
+      <div class="container container--narrow">
+        <div class="section__head" style="justify-content:center;text-align:center">
+          <div style="width:100%">
+            <div class="section__eyebrow">Вопросы</div>
+            <h2 class="section__title" style="margin:0 auto">Часто задаваемые вопросы</h2>
+          </div>
+        </div>
+        <div class="accordion" id="home-faq"></div>
+      </div>
+    </section>
+
+    <!-- Финальный CTA -->
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cta-banner">
+          <h2 class="cta-banner__title">Начните с планировки — остальное соберём вместе</h2>
+          <p class="cta-banner__text">
+            Конфигуратор сохраняет выбор на каждом шаге: квартира, дизайн, комплектация,
+            материалы и опции. Смета пересчитывается автоматически.
+          </p>
+          <a class="btn btn--light btn--lg" href="configurator.html">Подобрать ремонт</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'index';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const cityId = Store.getCityId();
+
+      /* ---------- Быстрый выбор ---------- */
+      const qsCity = document.getElementById('qs-city');
+      const qsDev = document.getElementById('qs-developer');
+      const qsComplex = document.getElementById('qs-complex');
+      const qsGo = document.getElementById('qs-go');
+
+      function fillCities() {
+        qsCity.innerHTML = catalog.cities
+          .map((c) => `<option value="${c.id}">${UI.escapeHtml(c.name)}</option>`)
+          .join('');
+        qsCity.value = cityId;
+      }
+
+      function fillDevelopers() {
+        const devs = catalog.developers.filter((d) => d.cityId === qsCity.value && d.published);
+        qsDev.innerHTML = devs
+          .map((d) => `<option value="${d.id}">${UI.escapeHtml(d.name)}</option>`)
+          .join('');
+        fillComplexes();
+      }
+
+      function fillComplexes() {
+        const complexes = catalog.complexes.filter(
+          (c) => c.developerId === qsDev.value && c.cityId === qsCity.value && c.published
+        );
+        qsComplex.innerHTML = complexes
+          .map((c) => `<option value="${c.id}">${UI.escapeHtml(c.name)}</option>`)
+          .join('');
+      }
+
+      qsCity.addEventListener('change', fillDevelopers);
+      qsDev.addEventListener('change', fillComplexes);
+      qsGo.addEventListener('click', () => {
+        const complex = catalog.complexes.find((c) => c.id === qsComplex.value);
+        if (complex) {
+          window.location.href = 'apartments.html?complex=' + encodeURIComponent(complex.slug);
+        } else {
+          window.location.href = 'complexes.html';
+        }
+      });
+
+      fillCities();
+      fillDevelopers();
+
+      /* ---------- Подборка ЖК ---------- */
+      const complexesEl = document.getElementById('home-complexes');
+      const complexes = catalog.complexes
+        .filter((c) => c.published && c.cityId === cityId)
+        .sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0))
+        .slice(0, 3);
+
+      complexesEl.innerHTML = complexes
+        .map((c) => {
+          const dev = catalog.developers.find((d) => d.id === c.developerId);
+          return `
+          <article class="card card--link">
+            <div class="card__media">
+              <img class="card__img" src="${c.image}" alt="${UI.escapeHtml(c.name)}" loading="lazy">
+                <span class="photo-credit">${c.imageKind === 'official' ? 'Материал с сайта застройщика' : 'Иллюстрация, не фото ЖК'}</span>
+              ${c.demo ? '<span class="badge badge--demo card__media-badge">Демо-данные</span>' : ''}
+              <button class="card__fav ${Store.isFavorite('complexes', c.id) ? 'is-active' : ''}" data-fav="complexes" data-id="${c.id}" aria-label="В избранное">♡</button>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title"><a href="complex.html?slug=${c.slug}">${UI.escapeHtml(c.name)}</a></h3>
+              <div class="card__meta">
+                <span class="tag">${UI.escapeHtml(dev ? dev.name : '')}</span>
+                <span class="tag">${UI.escapeHtml(c.class)}</span>
+              </div>
+              <p class="card__text">${UI.escapeHtml(c.description.slice(0, 110))}…</p>
+              <div class="card__footer">
+                <a class="btn btn--primary btn--sm" href="apartments.html?complex=${c.slug}">Выбрать квартиру</a>
+              </div>
+            </div>
+          </article>`;
+        })
+        .join('');
+
+      /* ---------- Категории квартир ---------- */
+      const typesEl = document.getElementById('home-types');
+      const typeCards = [
+        { type: 'studio', area: 'от 25 м²' },
+        { type: 'one', area: 'от 36 м²' },
+        { type: 'euro-two', area: 'от 42 м²' },
+        { type: 'two', area: 'от 55 м²' },
+        { type: 'three', area: 'от 68 м²' },
+      ];
+      typesEl.innerHTML = typeCards
+        .map((t) => {
+          const info = APARTMENT_TYPES[t.type];
+          return `
+          <a class="select-card" href="complexes.html" style="text-decoration:none">
+            <div class="select-card__title">${info.label}</div>
+            <div class="select-card__text">${t.area} · демонстрационные планировки в каталоге</div>
+            <div class="select-card__price">Смотреть ЖК →</div>
+          </a>`;
+        })
+        .join('');
+
+      /* ---------- Дизайн-проекты ---------- */
+      const designsEl = document.getElementById('home-designs');
+      designsEl.innerHTML = catalog.designs
+        .filter((d) => d.published)
+        .slice(0, 3)
+        .map((d) => `
+          <article class="card card--link">
+            <div class="card__media">
+              <img class="card__img" src="${d.image}" alt="${UI.escapeHtml(d.name)}" loading="lazy">
+              <button class="card__fav ${Store.isFavorite('designs', d.id) ? 'is-active' : ''}" data-fav="designs" data-id="${d.id}" aria-label="В избранное">♡</button>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title"><a href="design.html?slug=${d.slug}">${UI.escapeHtml(d.name)}</a></h3>
+              <div class="card__meta">
+                <span class="tag">${UI.escapeHtml(d.style)}</span>
+                <span class="tag">${UI.escapeHtml(d.priceLevel)}</span>
+              </div>
+              <p class="card__text">${UI.escapeHtml(d.description.slice(0, 110))}…</p>
+              <div class="card__footer">
+                <a class="btn btn--secondary btn--sm" href="configurator.html?design=${d.slug}">Выбрать этот дизайн</a>
+              </div>
+            </div>
+          </article>`)
+        .join('');
+
+      /* ---------- Шаги ---------- */
+      const stepsEl = document.getElementById('home-steps');
+      const steps = [
+        { n: '01', t: 'Выберите квартиру', d: 'ЖК, планировка и площадь — основа всего расчёта.' },
+        { n: '02', t: 'Подберите дизайн', d: 'Стиль, палитра и материалы под ваш образ жизни.' },
+        { n: '03', t: 'Соберите комплектацию', d: 'Комплектация, материалы, кухня и опции.' },
+        { n: '04', t: 'Получите смету', d: 'Прозрачная разбивка и ориентировочные сроки.' },
+      ];
+      stepsEl.innerHTML = steps
+        .map((s) => `
+          <div class="step-card">
+            <div class="step-card__num">${s.n}</div>
+            <div class="step-card__title">${s.t}</div>
+            <p class="step-card__text">${s.d}</p>
+          </div>`)
+        .join('');
+
+      /* ---------- Преимущества ---------- */
+      const benefitsEl = document.getElementById('home-benefits');
+      const benefits = [
+        { icon: '◈', t: 'Понятная разбивка', d: 'Работы, черновые и чистовые материалы, кухня, опции и прочие расходы — отдельными строками.' },
+        { icon: '↻', t: 'Мгновенный перерасчёт', d: 'Смените комплектацию или материал — смета обновится автоматически.' },
+        { icon: '◫', t: 'Сохранение выбора', d: 'Все параметры сохраняются между шагами и после обновления страницы.' },
+        { icon: '⏱', t: 'Ориентировочные сроки', d: 'Демонстрационная модель сроков с учётом площади и комплектации.' },
+      ];
+      benefitsEl.innerHTML = benefits
+        .map((b) => `
+          <div class="benefit">
+            <div class="benefit__icon" aria-hidden="true">${b.icon}</div>
+            <div>
+              <div class="benefit__title">${b.t}</div>
+              <p class="benefit__text">${b.d}</p>
+            </div>
+          </div>`)
+        .join('');
+
+      /* ---------- FAQ ---------- */
+      const faqEl = document.getElementById('home-faq');
+      const faq = [
+        { q: 'Что такое КВАДРАТ?', a: 'Это демонстрационный сервис, который помогает пройти путь от выбора новостройки до предварительного расчёта ремонта: город, застройщик, жилой комплекс, квартира, дизайн-проект, комплектация и смета.' },
+        { q: 'Насколько точна предварительная смета?', a: 'Смета рассчитывается по демонстрационной модели и носит информационный характер. Финальная стоимость и сроки определяются после уточнения параметров объекта и согласования состава работ.' },
+        { q: 'Это официальный сайт застройщика?', a: 'Нет. КВАДРАТ — независимый сервис. Данные о жилых комплексах, планировках и ценах приведены в демонстрационных целях и не являются официальными характеристиками.' },
+        { q: 'Можно ли изменить выбор после расчёта?', a: 'Да. Конфигуратор позволяет вернуться на любой шаг и изменить квартиру, дизайн, комплектацию, материалы или опции — смета пересчитается автоматически.' },
+        { q: 'Как оформить заявку?', a: 'Заполните форму на странице заявки: имя, телефон и согласие на обработку данных. В демонстрационной версии заявка сохраняется локально, отправка на сервер не подключена.' },
+      ];
+      faqEl.innerHTML = faq
+        .map(
+          (f, i) => `
+          <div class="accordion__item">
+            <button class="accordion__head" aria-expanded="false" aria-controls="faq-body-${i}">
+              ${f.q}
+              <span class="accordion__icon" aria-hidden="true">+</span>
+            </button>
+            <div class="accordion__body" id="faq-body-${i}">
+              <div class="accordion__body-inner">${f.a}</div>
+            </div>
+          </div>`
+        )
+        .join('');
+
+      UI.qsa('.accordion__head').forEach((head) => {
+        head.addEventListener('click', () => {
+          const item = head.closest('.accordion__item');
+          const body = item.querySelector('.accordion__body');
+          const open = item.classList.toggle('is-open');
+          head.setAttribute('aria-expanded', String(open));
+          body.style.maxHeight = open ? body.scrollHeight + 'px' : '0px';
+        });
+      });
+
+      /* ---------- Избранное ---------- */
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-fav]');
+        if (!btn) return;
+        const type = btn.dataset.fav;
+        const id = btn.dataset.id;
+        const added = Store.toggleFavorite(type, id);
+        btn.classList.toggle('is-active', added);
+        UI.updateFavoritesBadge();
+        UI.toast(added ? 'Добавлено в избранное' : 'Удалено из избранного');
+      });
+    });
+  </script>
+</body>
+</html>

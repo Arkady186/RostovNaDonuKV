@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>О проекте — КВАДРАТ</title>
+  <meta name="description" content="О сервисе КВАДРАТ: дизайн и ремонт новостроек.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">О проекте</h1>
+        <p class="page-hero__sub">
+          КВАДРАТ — демонстрационный сервис, который помогает пройти путь от выбора
+          новостройки до предварительного расчёта ремонта.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container container--narrow">
+        <div class="section__eyebrow">Идея</div>
+        <h2 class="section__title">От планировки до сметы — в одном месте</h2>
+        <p class="section__sub" style="margin-top:var(--space-4)">
+          Покупка квартиры в новостройке — только начало. Дальше нужно выбрать дизайн,
+          комплектацию, материалы и понять бюджет. КВАДРАТ собирает этот путь в единый
+          сценарий: город → застройщик → жилой комплекс → квартира → планировка →
+          дизайн-проект → комплектация → материалы → смета → заявка.
+        </p>
+        <hr class="divider">
+        <div class="section__eyebrow">Архитектура</div>
+        <h2 class="section__title">Готова к развитию</h2>
+        <p class="section__sub" style="margin-top:var(--space-4)">
+          Сервис построен на едином слое данных: каталог, конфигуратор, калькулятор сметы,
+          избранное и заявки изолированы друг от друга. Слой доступа к данным можно заменить
+          реальным API без переписывания интерфейса. Административная панель позволяет
+          добавлять города, застройщиков, ЖК, планировки, дизайн-проекты и менять цены
+          без изменения кода.
+        </p>
+        <hr class="divider">
+        <div class="section__eyebrow">Статус</div>
+        <h2 class="section__title">Демонстрационный продукт</h2>
+        <p class="section__sub" style="margin-top:var(--space-4)">
+          Все данные о жилых комплексах, планировках, ценах и сроках носят информационный
+          характер. Сервис не является официальным сайтом застройщиков и не выдаёт
+          демонстрационные визуализации за официальные материалы. Интеграции с каталогами
+          недвижимости, CRM, платёжными сервисами и электронной подписью — направления
+          дальнейшего развития.
+        </p>
+        <div class="hero__actions" style="margin-top:var(--space-7)">
+          <a class="btn btn--primary" href="how-it-works.html">Как это работает</a>
+          <a class="btn btn--secondary" href="contacts.html">Контакты</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'about';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'О проекте' },
+      ]);
+    });
+  </script>
+</body>
+</html>

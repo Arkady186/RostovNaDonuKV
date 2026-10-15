@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Административная панель — КВАДРАТ</title>
+  <meta name="description" content="Демонстрационная административная панель сервиса КВАДРАТ.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Административная панель</h1>
+        <p class="page-hero__sub">
+          Демонстрационная панель: изменения сохраняются в localStorage вашего браузера
+          и сразу отражаются в каталогах. Это не защищённая административная система.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="notice" style="margin-bottom:var(--space-6)">
+          <span class="notice__mark">i</span>
+          <span>Все изменения хранятся локально и не защищены авторизацией. Не публикуйте черновые планировки из исходного шаблона: это условные данные, не реальные квартиры. Перед публикацией добавьте оригинальный план, URL первоисточника, дату проверки и подтверждённые характеристики.</span>
+        </div>
+        <div class="admin-layout">
+          <nav class="admin-tabs" id="admin-tabs" aria-label="Разделы панели"></nav>
+          <div class="admin-panel">
+            <div class="admin-panel__head">
+              <h2 class="admin-panel__title" id="panel-title"></h2>
+              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+                <button class="btn btn--secondary btn--sm" id="btn-export" type="button">Экспорт JSON</button>
+                <button class="btn btn--secondary btn--sm" id="btn-import" type="button">Импорт JSON</button>
+                <button class="btn btn--danger btn--sm" id="btn-reset" type="button">Сбросить каталог</button>
+              </div>
+            </div>
+            <div class="admin-toolbar" id="admin-toolbar"></div>
+            <div id="admin-content"></div>
+          </div>
+        </div>
+        <input type="file" id="import-file" accept="application/json" hidden>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'admin';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let catalog = Store.getCatalog();
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Админ-панель' },
+      ]);
+
+      /* ---------- Конфигурация разделов ---------- */
+
+      const PKG_OPTIONS = () => catalog.packages.map((p) => ({ value: p.slug, label: p.name }));
+      const TYPE_OPTIONS = () => Object.keys(APARTMENT_TYPES).map((t) => ({ value: t, label: APARTMENT_TYPES[t].label }));
+
+      const SECTIONS = {
+        cities: {
+          label: 'Города',
+          key: 'cities',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'slug', label: 'Slug' },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+          ],
+        },
+        developers: {
+          label: 'Застройщики',
+          key: 'developers',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'cityId', label: 'Город', render: (v) => cityName(v) },
+            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'logoText', label: 'Текст логотипа', type: 'text' },
+            { key: 'cityId', label: 'Город', type: 'select', options: () => catalog.cities.map((c) => ({ value: c.id, label: c.name })), required: true },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+            { key: 'published', label: 'Опубликован', type: 'checkbox' },
+          ],
+        },
+        complexes: {
+          label: 'ЖК',
+          key: 'complexes',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'developerId', label: 'Застройщик', render: (v) => devName(v) },
+            { key: 'class', label: 'Класс' },
+            { key: 'priority', label: 'Приоритет', render: (v) => (v ? '★' : '') },
+            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'developerId', label: 'Застройщик', type: 'select', options: () => catalog.developers.map((d) => ({ value: d.id, label: d.name })), required: true },
+            { key: 'cityId', label: 'Город', type: 'select', options: () => catalog.cities.map((c) => ({ value: c.id, label: c.name })), required: true },
+            { key: 'class', label: 'Класс', type: 'select', options: () => [{ value: 'бизнес', label: 'Бизнес' }, { value: 'комфорт', label: 'Комфорт' }] },
+            { key: 'address', label: 'Адрес', type: 'text' },
+            { key: 'year', label: 'Год ввода', type: 'number' },
+            { key: 'floors', label: 'Этажность', type: 'text' },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+            { key: 'image', label: 'Изображение (URL)', type: 'text' },
+            { key: 'gallery', label: 'Галерея (URL через запятую)', type: 'list' },
+            { key: 'priority', label: 'Приоритетный объект', type: 'checkbox' },
+            { key: 'demo', label: 'Демонстрационные данные', type: 'checkbox' },
+            { key: 'published', label: 'Опубликован', type: 'checkbox' },
+          ],
+        },
+        apartments: {
+          label: 'Планировки',
+          key: 'apartments',
+          columns: [
+            { key: 'type', label: 'Тип', render: (v) => (APARTMENT_TYPES[v] ? APARTMENT_TYPES[v].label : v) },
+            { key: 'area', label: 'Площадь', render: (v) => v + ' м²' },
+            { key: 'complexId', label: 'ЖК', render: (v) => complexName(v) },
+            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
+          ],
+          fields: [
+            { key: 'complexId', label: 'Жилой комплекс', type: 'select', options: () => catalog.complexes.map((c) => ({ value: c.id, label: c.name })), required: true },
+            { key: 'type', label: 'Тип', type: 'select', options: TYPE_OPTIONS, required: true },
+            { key: 'area', label: 'Площадь, м²', type: 'number', required: true },
+            { key: 'rooms', label: 'Комнат', type: 'number', required: true },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+            { key: 'published', label: 'Опубликован', type: 'checkbox' },
+          ],
+        },
+        designs: {
+          label: 'Дизайн-проекты',
+          key: 'designs',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'style', label: 'Стиль' },
+            { key: 'priceLevel', label: 'Ценовой уровень' },
+            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'style', label: 'Стиль', type: 'text', required: true },
+            { key: 'packageLevel', label: 'Комплектация', type: 'select', options: PKG_OPTIONS, required: true },
+            { key: 'priceLevel', label: 'Ценовой уровень', type: 'text' },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+            { key: 'image', label: 'Изображение (URL)', type: 'text' },
+            { key: 'gallery', label: 'Галерея (URL через запятую)', type: 'list' },
+            { key: 'palette', label: 'Палитра (HEX через запятую)', type: 'list' },
+            { key: 'materials', label: 'Материалы (через запятую)', type: 'list' },
+            { key: 'suitableTypes', label: 'Подходящие типы квартир', type: 'list', options: TYPE_OPTIONS },
+            { key: 'published', label: 'Опубликован', type: 'checkbox' },
+          ],
+        },
+        packages: {
+          label: 'Комплектации',
+          key: 'packages',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'worksRate', label: 'Работы, ₽/м²' },
+            { key: 'roughRate', label: 'Черновые, ₽/м²' },
+            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'worksRate', label: 'Ставка работ, ₽/м²', type: 'number', required: true },
+            { key: 'roughRate', label: 'Ставка черновых материалов, ₽/м²', type: 'number', required: true },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+            { key: 'published', label: 'Опубликован', type: 'checkbox' },
+          ],
+        },
+        materials: {
+          label: 'Материалы',
+          key: 'materials',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'category', label: 'Категория', render: (v) => catLabel(v) },
+            { key: 'price', label: 'Цена', render: (v) => UI.formatMoney(v) },
+            { key: 'unit', label: 'Ед.' },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'category', label: 'Категория', type: 'select', options: () => MATERIAL_CATEGORIES.map((c) => ({ value: c.key, label: c.label })), required: true },
+            { key: 'unit', label: 'Единица измерения', type: 'text', required: true },
+            { key: 'price', label: 'Цена, ₽', type: 'number', required: true },
+            { key: 'includedIn', label: 'Включён в комплектации (slug через запятую)', type: 'list', options: PKG_OPTIONS },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+          ],
+        },
+        options: {
+          label: 'Дополнительные опции',
+          key: 'options',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'price', label: 'Цена', render: (v) => UI.formatMoney(v) },
+            { key: 'unit', label: 'Ед.' },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'unit', label: 'Единица измерения', type: 'text', required: true },
+            { key: 'price', label: 'Цена, ₽', type: 'number', required: true },
+            { key: 'qty', label: 'Количество (число или area)', type: 'text', required: true },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+          ],
+        },
+        kitchens: {
+          label: 'Кухни',
+          key: 'kitchens',
+          columns: [
+            { key: 'name', label: 'Название' },
+            { key: 'price', label: 'Цена', render: (v) => UI.formatMoney(v) },
+          ],
+          fields: [
+            { key: 'name', label: 'Название', type: 'text', required: true },
+            { key: 'slug', label: 'Slug', type: 'text', required: true },
+            { key: 'unit', label: 'Единица измерения', type: 'text', required: true },
+            { key: 'price', label: 'Цена, ₽', type: 'number', required: true },
+            { key: 'description', label: 'Описание', type: 'textarea' },
+          ],
+        },
+      };
+
+      const TAB_ORDER = ['cities', 'developers', 'complexes', 'apartments', 'designs', 'packages', 'materials', 'kitchens', 'options', 'prices', 'requests'];
+
+      /* ---------- Хелперы ---------- */
+
+      function cityName(id) {
+        const c = catalog.cities.find((x) => x.id === id);
+        return c ? c.name : id;
+      }
+      function devName(id) {
+        const d = catalog.developers.find((x) => x.id === id);
+        return d ? d.name : id;
+      }
+      function complexName(id) {
+        const c = catalog.complexes.find((x) => x.id === id);
+        return c ? c.name : id;
+      }
+      function catLabel(key) {
+        const c = MATERIAL_CATEGORIES.find((x) => x.key === key);
+        return c ? c.label : key;
+      }
+      function pubBadge(v) {
+        return v ? '<span class="badge">Опубликован</span>' : '<span class="badge badge--outline">Черновик</span>';
+      }
+
+      function persist() {
+        Store.saveCatalog(catalog);
+      }
+
+      function uid(prefix) {
+        return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      }
+
+      /* ---------- Вкладки ---------- */
+
+      let activeTab = 'complexes';
+      let searchQuery = '';
+
+      const tabsEl = document.getElementById('admin-tabs');
+      const panelTitle = document.getElementById('panel-title');
+      const toolbarEl = document.getElementById('admin-toolbar');
+      const contentEl = document.getElementById('admin-content');
+
+      function renderTabs() {
+        tabsEl.innerHTML = TAB_ORDER.map((key) => {
+          const label = key === 'prices' ? 'Цены' : key === 'requests' ? 'Заявки' : SECTIONS[key].label;
+          const count = key === 'prices' ? '' : key === 'requests' ? Store.getRequests().length : catalog[key].length;
+          return `<button class="admin-tab ${key === activeTab ? 'is-active' : ''}" data-tab="${key}">
+            <span>${label}</span>${count !== '' ? `<span class="fav-count">${count}</span>` : ''}
+          </button>`;
+        }).join('');
+        UI.qsa('.admin-tab', tabsEl).forEach((t) =>
+          t.addEventListener('click', () => {
+            activeTab = t.dataset.tab;
+            searchQuery = '';
+            renderTabs();
+            renderPanel();
+          })
+        );
+      }
+
+      /* ---------- Рендер разделов ---------- */
+
+      function renderPanel() {
+        if (activeTab === 'prices') return renderPrices();
+        if (activeTab === 'requests') return renderRequests();
+        renderCrud();
+      }
+
+      function renderCrud() {
+        const section = SECTIONS[activeTab];
+        panelTitle.textContent = section.label;
+
+        toolbarEl.innerHTML = `
+          <input class="input" id="crud-search" type="search" placeholder="Поиск по ${section.label.toLowerCase()}…" value="${UI.escapeHtml(searchQuery)}">
+          <button class="btn btn--primary btn--sm" id="btn-add" type="button">+ Добавить</button>`;
+
+        const searchEl = document.getElementById('crud-search');
+        searchEl.addEventListener('input', () => {
+          searchQuery = searchEl.value;
+          renderTable();
+        });
+        document.getElementById('btn-add').addEventListener('click', () => openForm(section, null));
+
+        renderTable();
+      }
+
+      function renderTable() {
+        const section = SECTIONS[activeTab];
+        const q = searchQuery.toLowerCase();
+        const list = catalog[section.key].filter((item) => {
+          if (!q) return true;
+          return section.columns.some((col) => String(item[col.key] || '').toLowerCase().includes(q));
+        });
+
+        if (!list.length) {
+          contentEl.innerHTML = UI.emptyState('Ничего не найдено', 'Измените поиск или добавьте новую запись.');
+          return;
+        }
+
+        contentEl.innerHTML = `
+          <div style="overflow-x:auto">
+            <table class="table">
+              <thead><tr>
+                ${section.columns.map((c) => `<th>${c.label}</th>`).join('')}
+                <th style="text-align:right">Действия</th>
+              </tr></thead>
+              <tbody>
+                ${list
+                  .map((item) => {
+                    const cells = section.columns
+                      .map((c) => {
+                        const v = item[c.key];
+                        const rendered = c.render ? c.render(v, item) : UI.escapeHtml(String(v == null ? '' : v));
+                        return `<td>${rendered}</td>`;
+                      })
+                      .join('');
+                    const pubBtn =
+                      section.key === 'cities'
+                        ? ''
+                        : `<button class="icon-btn" data-act="publish" data-id="${item.id}" title="${item.published ? 'Снять с публикации' : 'Опубликовать'}" aria-label="Переключить публикацию">${item.published ? '◉' : '○'}</button>`;
+                    return `<tr>
+                      ${cells}
+                      <td><div class="table__actions">
+                        ${pubBtn}
+                        <button class="icon-btn" data-act="edit" data-id="${item.id}" title="Редактировать" aria-label="Редактировать">✎</button>
+                        <button class="icon-btn icon-btn--danger" data-act="delete" data-id="${item.id}" title="Удалить" aria-label="Удалить">✕</button>
+                      </div></td>
+                    </tr>`;
+                  })
+                  .join('')}
+              </tbody>
+            </table>
+          </div>`;
+
+        UI.qsa('[data-act]', contentEl).forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const act = btn.dataset.act;
+            if (act === 'edit') {
+              const item = catalog[section.key].find((x) => x.id === id);
+              openForm(section, item);
+            } else if (act === 'publish') {
+              const item = catalog[section.key].find((x) => x.id === id);
+              item.published = !item.published;
+              persist();
+              renderTable();
+              UI.toast(item.published ? 'Опубликовано' : 'Снято с публикации');
+            } else if (act === 'delete') {
+              const ok = await UI.confirmDialog('Удалить запись? Действие необратимо.');
+              if (!ok) return;
+              catalog[section.key] = catalog[section.key].filter((x) => x.id !== id);
+              persist();
+              renderTabs();
+              renderTable();
+              UI.toast('Запись удалена');
+            }
+          });
+        });
+      }
+
+      /* ---------- Форма добавления/редактирования ---------- */
+
+      function openForm(section, entity) {
+        const isEdit = !!entity;
+        const values = entity ? { ...entity } : { published: true };
+
+        let html = '';
+        for (const f of section.fields) {
+          const val = values[f.key];
+          let input = '';
+          if (f.type === 'textarea') {
+            input = `<textarea class="textarea" data-field="${f.key}">${UI.escapeHtml(val || '')}</textarea>`;
+          } else if (f.type === 'checkbox') {
+            input = `<label class="checkbox"><input type="checkbox" data-field="${f.key}" ${val ? 'checked' : ''}><span>${f.label}</span></label>`;
+          } else if (f.type === 'select') {
+            const opts = f.options ? f.options() : [];
+            input = `<select class="select" data-field="${f.key}">
+              <option value="">— Выберите —</option>
+              ${opts.map((o) => `<option value="${UI.escapeHtml(o.value)}" ${String(val) === String(o.value) ? 'selected' : ''}>${UI.escapeHtml(o.label)}</option>`).join('')}
+            </select>`;
+          } else if (f.type === 'list') {
+            const listVal = Array.isArray(val) ? val.join(', ') : '';
+            input = `<input class="input" data-field="${f.key}" type="text" value="${UI.escapeHtml(listVal)}">`;
+          } else {
+            input = `<input class="input" data-field="${f.key}" type="${f.type === 'number' ? 'number' : 'text'}" value="${UI.escapeHtml(val == null ? '' : val)}">`;
+          }
+          if (f.type === 'checkbox') {
+            html += `<div class="field" style="margin-bottom:var(--space-4)">${input}</div>`;
+          } else {
+            html += `<div class="field" style="margin-bottom:var(--space-4)">
+              <label class="field__label" for="f-${f.key}">${f.label}${f.required ? ' *' : ''}</label>
+              ${input}
+              <span class="field__error" data-error="${f.key}">Заполните поле</span>
+            </div>`;
+          }
+        }
+
+        const m = UI.modal(html, { title: isEdit ? `Редактирование: ${entity.name || entity.id}` : `Новая запись: ${section.label}` });
+
+        const actions = document.createElement('div');
+        actions.className = 'modal-card__actions';
+        actions.innerHTML = `
+          <button class="btn btn--secondary" data-act="cancel">Отмена</button>
+          <button class="btn btn--primary" data-act="save">Сохранить</button>`;
+        m.el.querySelector('.modal-card').appendChild(actions);
+
+        actions.querySelector('[data-act="cancel"]').addEventListener('click', () => m.close());
+
+        actions.querySelector('[data-act="save"]').addEventListener('click', () => {
+          const data = {};
+          let valid = true;
+
+          for (const f of section.fields) {
+            const input = m.el.querySelector(`[data-field="${f.key}"]`);
+            if (!input) continue;
+            let v;
+            if (f.type === 'checkbox') {
+              v = input.checked;
+            } else if (f.type === 'number') {
+              v = input.value === '' ? null : Number(input.value);
+            } else if (f.type === 'list') {
+              v = input.value
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean);
+            } else {
+              v = input.value.trim();
+            }
+
+            if (f.required && (v === '' || v === null || v === undefined)) {
+              valid = false;
+              const field = input.closest('.field');
+              if (field) field.classList.add('has-error');
+              continue;
+            }
+            data[f.key] = v;
+          }
+
+          /* Уникальность slug */
+          if (data.slug && section.key !== 'cities') {
+            const dup = catalog[section.key].some((x) => x.slug === data.slug && x.id !== (entity ? entity.id : null));
+            if (dup) {
+              valid = false;
+              UI.toast('Запись с таким slug уже существует');
+            }
+          }
+
+          if (!valid) {
+            UI.toast('Проверьте заполнение обязательных полей');
+            return;
+          }
+
+          if (isEdit) {
+            Object.assign(entity, data);
+          } else {
+            data.id = uid(section.key === 'complexes' ? 'cx' : section.key === 'apartments' ? 'apt' : section.key === 'designs' ? 'ds' : section.key === 'developers' ? 'dev' : section.key === 'cities' ? 'c' : section.key === 'packages' ? 'pkg' : section.key === 'materials' ? 'mat' : section.key === 'kitchens' ? 'kit' : section.key === 'options' ? 'opt' : 'id');
+            if (data.published === undefined) data.published = true;
+            catalog[section.key].push(data);
+          }
+
+          persist();
+          m.close();
+          renderTabs();
+          renderTable();
+          UI.toast('Сохранено');
+        });
+      }
+
+      /* ---------- Цены ---------- */
+
+      function renderPrices() {
+        panelTitle.textContent = 'Цены';
+        toolbarEl.innerHTML = `
+          <span class="tag">Комплектации</span>
+          <span class="tag">Материалы</span>
+          <span class="tag">Кухни</span>
+          <span class="tag">Опции</span>`;
+
+        const rows = [];
+        for (const p of catalog.packages) {
+          rows.push({ type: 'Комплектация', name: p.name + ' · работы', price: p.worksRate, unit: '₽/м²', id: p.id, key: 'packages', field: 'worksRate' });
+          rows.push({ type: 'Комплектация', name: p.name + ' · черновые', price: p.roughRate, unit: '₽/м²', id: p.id, key: 'packages', field: 'roughRate' });
+        }
+        for (const m of catalog.materials) {
+          rows.push({ type: 'Материал', name: m.name, price: m.price, unit: m.unit, id: m.id, key: 'materials', field: 'price' });
+        }
+        for (const k of catalog.kitchens) {
+          rows.push({ type: 'Кухня', name: k.name, price: k.price, unit: k.unit, id: k.id, key: 'kitchens', field: 'price' });
+        }
+        for (const o of catalog.options) {
+          rows.push({ type: 'Опция', name: o.name, price: o.price, unit: o.unit, id: o.id, key: 'options', field: 'price' });
+        }
+
+        contentEl.innerHTML = `
+          <div style="overflow-x:auto">
+            <table class="table">
+              <thead><tr><th>Тип</th><th>Наименование</th><th>Цена</th><th>Ед.</th><th style="text-align:right">Действия</th></tr></thead>
+              <tbody>
+                ${rows
+                  .map(
+                    (r) => `<tr>
+                      <td><span class="tag">${r.type}</span></td>
+                      <td>${UI.escapeHtml(r.name)}</td>
+                      <td>${UI.formatMoney(r.price)}</td>
+                      <td>${UI.escapeHtml(r.unit)}</td>
+                      <td><div class="table__actions">
+                        <button class="icon-btn" data-price-edit="${r.id}" data-key="${r.key}" data-field="${r.field}" title="Изменить цену" aria-label="Изменить цену">✎</button>
+                      </div></td>
+                    </tr>`
+                  )
+                  .join('')}
+              </tbody>
+            </table>
+          </div>`;
+
+        UI.qsa('[data-price-edit]', contentEl).forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const item = catalog[btn.dataset.key].find((x) => x.id === btn.dataset.priceEdit);
+            if (!item) return;
+            const m = UI.modal(
+              `<div class="field">
+                <label class="field__label" for="price-input">Новая цена, ₽</label>
+                <input class="input" id="price-input" type="number" value="${item[btn.dataset.field]}">
+              </div>`,
+              { title: `Цена: ${item.name}` }
+            );
+            const actions = document.createElement('div');
+            actions.className = 'modal-card__actions';
+            actions.innerHTML = `<button class="btn btn--secondary" data-act="cancel">Отмена</button><button class="btn btn--primary" data-act="save">Сохранить</button>`;
+            m.el.querySelector('.modal-card').appendChild(actions);
+            actions.querySelector('[data-act="cancel"]').addEventListener('click', () => m.close());
+            actions.querySelector('[data-act="save"]').addEventListener('click', () => {
+              const v = Number(document.getElementById('price-input').value);
+              if (!v || v <= 0) {
+                UI.toast('Укажите корректную цену');
+                return;
+              }
+              item[btn.dataset.field] = v;
+              persist();
+              m.close();
+              renderPrices();
+              UI.toast('Цена обновлена');
+            });
+          });
+        });
+      }
+
+      /* ---------- Заявки ---------- */
+
+      function renderRequests() {
+        panelTitle.textContent = 'Заявки';
+        toolbarEl.innerHTML = `<span class="tag">Демонстрационные заявки, сохранённые локально</span>`;
+
+        const requests = Store.getRequests();
+        if (!requests.length) {
+          contentEl.innerHTML = UI.emptyState('Заявок пока нет', 'Заявки, отправленные через форму на странице «Заявка», появятся здесь.');
+          return;
+        }
+
+        contentEl.innerHTML = `
+          <div style="overflow-x:auto">
+            <table class="table">
+              <thead><tr><th>Дата</th><th>Имя</th><th>Телефон</th><th>E-mail</th><th>Сумма</th><th style="text-align:right">Действия</th></tr></thead>
+              <tbody>
+                ${requests
+                  .map(
+                    (r) => `<tr>
+                      <td>${new Date(r.createdAt).toLocaleString('ru-RU')}</td>
+                      <td>${UI.escapeHtml(r.name)}</td>
+                      <td>${UI.escapeHtml(r.phone)}</td>
+                      <td>${UI.escapeHtml(r.email || '—')}</td>
+                      <td>${UI.formatMoney(r.total)}</td>
+                      <td><div class="table__actions">
+                        <button class="icon-btn" data-req-view="${r.id}" title="Просмотр" aria-label="Просмотр">👁</button>
+                        <button class="icon-btn icon-btn--danger" data-req-del="${r.id}" title="Удалить" aria-label="Удалить">✕</button>
+                      </div></td>
+                    </tr>`
+                  )
+                  .join('')}
+              </tbody>
+            </table>
+          </div>`;
+
+        UI.qsa('[data-req-view]', contentEl).forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const r = requests.find((x) => x.id === btn.dataset.reqView);
+            if (!r) return;
+            const cfg = r.config || {};
+            const lines = [
+              ['Имя', r.name],
+              ['Телефон', r.phone],
+              ['E-mail', r.email || '—'],
+              ['Комментарий', r.comment || '—'],
+              ['ЖК', complexName(cfg.complexId)],
+              ['Квартира', cfg.apartmentId || '—'],
+              ['Дизайн', cfg.designId || '—'],
+              ['Комплектация', cfg.packageId || '—'],
+              ['Сумма', UI.formatMoney(r.total)],
+            ];
+            UI.modal(
+              lines.map((l) => `<div class="estimate__row"><div class="estimate__row-name">${l[0]}</div><div class="estimate__row-value">${UI.escapeHtml(l[1])}</div></div>`).join(''),
+              { title: 'Заявка от ' + new Date(r.createdAt).toLocaleString('ru-RU') }
+            );
+          });
+        });
+
+        UI.qsa('[data-req-del]', contentEl).forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const ok = await UI.confirmDialog('Удалить заявку?');
+            if (!ok) return;
+            Store.removeRequest(btn.dataset.reqDel);
+            renderTabs();
+            renderRequests();
+            UI.toast('Заявка удалена');
+          });
+        });
+      }
+
+      /* ---------- Импорт / экспорт / сброс ---------- */
+
+      document.getElementById('btn-export').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(catalog, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'kvadrat-catalog.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        UI.toast('Каталог экспортирован');
+      });
+
+      const importFile = document.getElementById('import-file');
+      document.getElementById('btn-import').addEventListener('click', () => importFile.click());
+      importFile.addEventListener('change', () => {
+        const file = importFile.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            const required = ['cities', 'developers', 'complexes', 'apartments', 'designs', 'packages', 'materials', 'kitchens', 'options'];
+            const ok = required.every((k) => Array.isArray(data[k]));
+            if (!ok || data.schemaVersion !== KVADRAT_SCHEMA_VERSION) {
+              UI.toast('Структура файла не соответствует каталогу');
+              return;
+            }
+            catalog = data;
+            persist();
+            renderTabs();
+            renderPanel();
+            UI.toast('Каталог импортирован');
+          } catch (e) {
+            UI.toast('Не удалось прочитать JSON-файл');
+          }
+        };
+        reader.readAsText(file);
+        importFile.value = '';
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', async () => {
+        const ok = await UI.confirmDialog('Сбросить каталог к демонстрационным данным по умолчанию?', { confirmText: 'Сбросить', danger: true });
+        if (!ok) return;
+        Store.resetCatalog();
+        catalog = Store.getCatalog();
+        renderTabs();
+        renderPanel();
+        UI.toast('Каталог сброшен');
+      });
+
+      /* ---------- Старт ---------- */
+      renderTabs();
+      renderPanel();
+    });
+  </script>
+</body>
+</html>

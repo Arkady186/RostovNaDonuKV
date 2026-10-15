@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как это работает — КВАДРАТ</title>
+  <meta name="description" content="Путь от выбора квартиры до предварительной сметы ремонта.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Как это работает</h1>
+        <p class="page-hero__sub">
+          Полный путь от выбора новостройки до предварительной сметы — восемь понятных шагов.
+          Выбор сохраняется автоматически, смета пересчитывается при любом изменении.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--2" id="steps-list"></div>
+      </div>
+    </section>
+
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Важно знать</div>
+            <h2 class="section__title">Ограничения демонстрационной версии</h2>
+          </div>
+        </div>
+        <div class="grid grid--2" id="limits-list"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cta-banner">
+          <h2 class="cta-banner__title">Попробуйте прямо сейчас</h2>
+          <p class="cta-banner__text">Откройте конфигуратор и соберите свой ремонт за несколько минут.</p>
+          <a class="btn btn--light btn--lg" href="configurator.html">Открыть конфигуратор</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'how-it-works';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Как это работает' },
+      ]);
+
+      const steps = [
+        { n: '01', t: 'Город и застройщик', d: 'Выберите город и застройщика — каталог жилых комплексов обновится автоматически.', href: 'developers.html', btn: 'Застройщики' },
+        { n: '02', t: 'Жилой комплекс', d: 'Изучите галерею, описание и характеристики. Приоритетный объект — ЖК «Октябрь Парк».', href: 'complexes.html', btn: 'Каталог ЖК' },
+        { n: '03', t: 'Квартира и планировка', d: 'Выберите тип и площадь. Демонстрационные планировки показывают зонирование комнат.', href: 'apartments.html?complex=oktyabr-park', btn: 'Планировки' },
+        { n: '04', t: 'Дизайн-проект', d: 'Шесть направлений: палитра, материалы, подходящие типы квартир и уровень бюджета.', href: 'designs.html', btn: 'Дизайн-проекты' },
+        { n: '05', t: 'Комплектация', d: 'Базовая, Комфорт или Премиум — базовая ставка работ и черновых материалов за квадратный метр.', href: 'configurator.html?step=3', btn: 'К шагу 3' },
+        { n: '06', t: 'Материалы и кухня', d: 'По одному материалу на категорию: пол, стены, потолок, плитка, двери, свет, сантехника. Плюс вариант кухни.', href: 'configurator.html?step=4', btn: 'К шагу 4' },
+        { n: '07', t: 'Дополнительные опции', d: 'Тёплый пол, шумоизоляция, системы хранения и другие опции с собственной ценой и единицей расчёта.', href: 'configurator.html?step=6', btn: 'К шагу 6' },
+        { n: '08', t: 'Смета и заявка', d: 'Прозрачная разбивка, итог, стоимость за м² и ориентировочные сроки. Заявка сохраняется локально.', href: 'estimate.html', btn: 'Смета' },
+      ];
+
+      document.getElementById('steps-list').innerHTML = steps
+        .map(
+          (s) => `
+          <div class="step-card">
+            <div class="step-card__num">${s.n}</div>
+            <div class="step-card__title">${s.t}</div>
+            <p class="step-card__text">${s.d}</p>
+            <div style="margin-top:var(--space-4)">
+              <a class="btn btn--secondary btn--sm" href="${s.href}">${s.btn} →</a>
+            </div>
+          </div>`
+        )
+        .join('');
+
+      const limits = [
+        { t: 'Данные о ЖК', d: 'Планировки, площади и характеристики — демонстрационные. Они не являются официальными данными застройщиков.' },
+        { t: 'Цены и смета', d: 'Смета рассчитывается по демонстрационной модели. Финальная стоимость определяется после уточнения параметров объекта.' },
+        { t: 'Сроки', d: 'Продолжительность ремонта — ориентировочная модель с учётом площади и комплектации, без точной даты завершения.' },
+        { t: 'Заявки и админка', d: 'Заявки и изменения каталога хранятся локально в браузере. Отправка на сервер и защищённая админка не подключены.' },
+      ];
+
+      document.getElementById('limits-list').innerHTML = limits
+        .map(
+          (l) => `
+          <div class="benefit">
+            <div class="benefit__icon" aria-hidden="true">i</div>
+            <div>
+              <div class="benefit__title">${l.t}</div>
+              <p class="benefit__text">${l.d}</p>
+            </div>
+          </div>`
+        )
+        .join('');
+    });
+  </script>
+</body>
+</html>

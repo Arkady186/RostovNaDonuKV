@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Контакты — КВАДРАТ</title>
+  <meta name="description" content="Контакты сервиса КВАДРАТ. Демонстрационные данные.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Контакты</h1>
+        <p class="page-hero__sub">
+          Демонстрационные контактные данные. Адрес и телефон не являются реальными.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--2" style="align-items:start;gap:var(--space-9)">
+          <div>
+            <div class="summary-list">
+              <div class="summary-list__row"><span>Телефон</span><span><a href="tel:${BRAND.contacts.phone.replace(/[^+\d]/g, '')}">${UI.escapeHtml(BRAND.contacts.phone)}</a></span></div>
+              <div class="summary-list__row"><span>E-mail</span><span><a href="mailto:${UI.escapeHtml(BRAND.contacts.email)}">${UI.escapeHtml(BRAND.contacts.email)}</a></span></div>
+              <div class="summary-list__row"><span>Адрес</span><span>${UI.escapeHtml(BRAND.contacts.address)}</span></div>
+              <div class="summary-list__row"><span>Режим работы</span><span>${UI.escapeHtml(BRAND.contacts.hours)}</span></div>
+            </div>
+            <div class="notice" style="margin-top:var(--space-6)">
+              <span class="notice__mark">i</span>
+              <span>Контактные данные редактируются централизованно в файле данных сервиса и являются демонстрационными.</span>
+            </div>
+          </div>
+          <div>
+            <div class="section__eyebrow">Напишите нам</div>
+            <h2 class="section__title">Форма обратной связи</h2>
+            <p class="section__sub" style="margin-top:var(--space-3)">
+              Демонстрационная форма: сообщение сохраняется локально, отправка на сервер не подключена.
+            </p>
+            <form id="contact-form" style="margin-top:var(--space-6)" novalidate>
+              <div class="field" style="margin-bottom:var(--space-5)">
+                <label class="field__label" for="cf-name">Имя *</label>
+                <input class="input" id="cf-name" type="text" placeholder="Как к вам обращаться">
+                <span class="field__error">Укажите имя</span>
+              </div>
+              <div class="field" style="margin-bottom:var(--space-5)">
+                <label class="field__label" for="cf-email">E-mail *</label>
+                <input class="input" id="cf-email" type="email" placeholder="you@example.com">
+                <span class="field__error">Укажите корректный e-mail</span>
+              </div>
+              <div class="field" style="margin-bottom:var(--space-5)">
+                <label class="field__label" for="cf-message">Сообщение *</label>
+                <textarea class="textarea" id="cf-message" placeholder="Ваш вопрос"></textarea>
+                <span class="field__error">Напишите сообщение</span>
+              </div>
+              <button class="btn btn--primary" type="submit">Отправить</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'contacts';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Контакты' },
+      ]);
+
+      const form = document.getElementById('contact-form');
+      const nameEl = document.getElementById('cf-name');
+      const emailEl = document.getElementById('cf-email');
+      const msgEl = document.getElementById('cf-message');
+
+      function setError(el, has) {
+        el.closest('.field').classList.toggle('has-error', has);
+        el.classList.toggle('is-invalid', has);
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let ok = true;
+        const nameOk = nameEl.value.trim().length >= 2;
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailEl.value.trim());
+        const msgOk = msgEl.value.trim().length >= 5;
+        setError(nameEl, !nameOk);
+        setError(emailEl, !emailOk);
+        setError(msgEl, !msgOk);
+        ok = nameOk && emailOk && msgOk;
+        if (!ok) {
+          UI.toast('Проверьте заполнение формы');
+          return;
+        }
+        form.innerHTML = `
+          <div class="empty-state" style="border:none;background:var(--bg)">
+            <div class="empty-state__icon" aria-hidden="true">✓</div>
+            <div class="empty-state__title">Сообщение сохранено</div>
+            <p class="empty-state__text">Демонстрационное сообщение сохранено локально. Отправка на сервер не подключена.</p>
+          </div>`;
+      });
+    });
+  </script>
+</body>
+</html>

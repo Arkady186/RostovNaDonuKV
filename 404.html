@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Страница не найдена — КВАДРАТ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="empty-state" style="max-width:560px;margin:0 auto;border:none;background:var(--surface);box-shadow:var(--shadow-sm)">
+          <div class="empty-state__icon" aria-hidden="true">404</div>
+          <div class="empty-state__title">Страница не найдена</div>
+          <p class="empty-state__text">
+            Возможно, ссылка устарела или страница была перемещена.
+            Вернитесь на главную и продолжите выбор квартиры и ремонта.
+          </p>
+          <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+            <a class="btn btn--primary" href="index.html">На главную</a>
+            <a class="btn btn--secondary" href="complexes.html">Каталог ЖК</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = '';
+  </script>
+</body>
+</html>

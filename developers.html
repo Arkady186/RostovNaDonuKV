@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Застройщики — КВАДРАТ</title>
+  <meta name="description" content="Каталог застройщиков Ростова-на-Дону: ССК, СК10, Доннефтестрой.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Застройщики</h1>
+        <p class="page-hero__sub">
+          Стартовый каталог для Ростова-на-Дону. Добавление новых городов и застройщиков
+          не требует изменения кода — данные редактируются в административной панели.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--auto" id="developers-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'developers';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const cityId = Store.getCityId();
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Застройщики' },
+      ]);
+
+      const grid = document.getElementById('developers-grid');
+      const devs = catalog.developers.filter((d) => d.published && d.cityId === cityId);
+
+      grid.innerHTML = devs
+        .map((d) => {
+          const complexes = catalog.complexes.filter((c) => c.developerId === d.id && c.published);
+          const city = catalog.cities.find((c) => c.id === d.cityId);
+          return `
+          <article class="card card--link">
+            <div class="card__body" style="gap:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:var(--space-4)">
+                <div style="width:56px;height:56px;border-radius:14px;background:var(--accent-soft);color:var(--accent-2);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:1.05rem;flex-shrink:0">
+                  ${UI.escapeHtml(d.logoText || d.name.slice(0, 3).toUpperCase())}
+                </div>
+                <div>
+                  <h2 class="card__title" style="font-size:1.25rem">${UI.escapeHtml(d.name)}</h2>
+                  <div class="card__meta" style="margin-top:var(--space-2)">
+                    <span class="tag">${UI.escapeHtml(city ? city.name : '')}</span>
+                    <span class="tag">${complexes.length} ЖК</span>
+                  </div>
+                </div>
+              </div>
+              <p class="card__text">${UI.escapeHtml(d.description)}</p>
+              <div class="card__footer">
+                <a class="btn btn--primary btn--sm" href="complexes.html?developer=${d.slug}">Каталог ЖК</a>
+              </div>
+            </div>
+          </article>`;
+        })
+        .join('');
+
+      if (!devs.length) {
+        grid.innerHTML = UI.emptyState('Пока нет застройщиков', 'Добавьте застройщика в административной панели.');
+      }
+    });
+  </script>
+</body>
+</html>

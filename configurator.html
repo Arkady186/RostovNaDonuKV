@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Конфигуратор ремонта — КВАДРАТ</title>
+  <meta name="description" content="Многошаговый конфигуратор: квартира, дизайн, комплектация, материалы, кухня, опции и предварительная смета.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero" style="padding-bottom:var(--space-6)">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Конфигуратор ремонта</h1>
+        <p class="page-hero__sub">
+          Восемь шагов от квартиры до предварительной сметы. Выбор сохраняется
+          автоматически — можно вернуться и изменить любой параметр.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight" style="padding-top:var(--space-6)">
+      <div class="container">
+        <div class="steps" id="steps-bar" aria-label="Шаги конфигуратора"></div>
+
+        <div class="config-layout">
+          <div class="config-main">
+            <div id="step-content"></div>
+          </div>
+          <aside class="config-side">
+            <div class="config-side__card">
+              <div class="config-side__title">Ваш выбор</div>
+              <div id="side-summary"></div>
+              <div class="config-side__total" id="side-total">—</div>
+              <div class="config-side__actions">
+                <button class="btn btn--secondary" id="btn-prev" type="button">← Назад</button>
+                <button class="btn btn--primary" id="btn-next" type="button">Далее →</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'configurator';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const cityId = Store.getCityId();
+
+      /* ---------- Состояние ---------- */
+      let state = Store.getConfig();
+      if (state.apartmentId && state.apartmentId !== 'custom-area') {
+        const savedApartment = catalog.apartments.find((a) => a.id === state.apartmentId && a.published);
+        if (!savedApartment) {
+          state.apartmentId = null;
+          state.customArea = null;
+          state.customType = null;
+          state.customRooms = null;
+          Store.saveConfig(state);
+        }
+      }
+
+      const urlComplex = UI.getParam('complex');
+      const urlApartment = UI.getParam('apartment');
+      const urlDesign = UI.getParam('design');
+      const urlStep = UI.getParam('step');
+
+      if (urlComplex) {
+        const c = catalog.complexes.find((x) => x.slug === urlComplex && x.published);
+        if (c) {
+          state.complexId = c.id;
+          state.apartmentId = null;
+        }
+      }
+      if (urlApartment) {
+        const a = catalog.apartments.find((x) => x.id === urlApartment && x.published);
+        if (a && a.complexId === state.complexId) state.apartmentId = a.id;
+      }
+      if (urlDesign) {
+        const d = catalog.designs.find((x) => x.slug === urlDesign && x.published);
+        if (d) state.designId = d.id;
+      }
+
+      let step = 1;
+      if (urlStep) {
+        const n = Number(urlStep);
+        if (n >= 1 && n <= 8) step = n;
+      } else if (urlApartment || urlDesign) {
+        step = 2;
+      }
+
+      const STEPS = [
+        { n: 1, label: 'Квартира' },
+        { n: 2, label: 'Дизайн' },
+        { n: 3, label: 'Комплектация' },
+        { n: 4, label: 'Материалы' },
+        { n: 5, label: 'Кухня' },
+        { n: 6, label: 'Опции' },
+        { n: 7, label: 'Итог' },
+        { n: 8, label: 'Смета' },
+      ];
+
+      const contentEl = document.getElementById('step-content');
+      const stepsBar = document.getElementById('steps-bar');
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Конфигуратор' },
+      ]);
+
+      /* ---------- Хелперы ---------- */
+
+      function planSvg(a) {
+        const layout = PLAN_LAYOUTS[a.type] || PLAN_LAYOUTS.one;
+        let s = '<svg viewBox="0 0 100 100" style="width:100%;height:auto" role="img" aria-label="Планировка">';
+        s += '<rect x="0" y="0" width="100" height="100" fill="#F7F5F0"/>';
+        layout.forEach((room, i) => {
+          const fill = i % 2 === 0 ? '#FFFFFF' : '#F2ECE2';
+          const cx = room.x + room.w / 2;
+          const cy = room.y + room.h / 2;
+          s += `<rect x="${room.x}" y="${room.y}" width="${room.w}" height="${room.h}" fill="${fill}" stroke="#242722" stroke-width="0.7"/>`;
+          s += `<text x="${cx}" y="${cy - 1.5}" text-anchor="middle" font-size="3.6" font-family="Manrope, sans-serif" font-weight="600" fill="#242722">${UI.escapeHtml(room.label)}</text>`;
+          s += `<text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="3" font-family="Inter, sans-serif" fill="#777970">${room.area} м²</text>`;
+        });
+        s += '</svg>';
+        return s;
+      }
+
+      function save() {
+        state.step = step;
+        Store.saveConfig(state);
+      }
+
+      function currentApartment() {
+        const real = catalog.apartments.find((a) => a.id === state.apartmentId && a.published);
+        if (real) return real;
+        if (state.apartmentId === 'custom-area' && Number(state.customArea) >= 15 && Number(state.customArea) <= 300) {
+          return {
+            id: 'custom-area',
+            area: Number(state.customArea),
+            rooms: Number(state.customRooms) || 2,
+            type: state.customType || 'one',
+            description: 'Расчёт по введённой площади, без подтверждённой планировки',
+            dataStatus: 'estimate-only',
+          };
+        }
+        return null;
+      }
+
+      function currentComplex() {
+        return catalog.complexes.find((c) => c.id === state.complexId && c.published);
+      }
+
+      function currentDesign() {
+        return catalog.designs.find((d) => d.id === state.designId && d.published);
+      }
+
+      function currentPackage() {
+        return catalog.packages.find((p) => p.id === state.packageId && p.published);
+      }
+
+      function currentKitchen() {
+        return catalog.kitchens.find((k) => k.id === state.kitchenId);
+      }
+
+      function liveEstimate() {
+        if (!state.apartmentId || !state.packageId) return null;
+        return Estimate.calculate(state);
+      }
+
+      /* ---------- Шаги ---------- */
+
+      function renderStepsBar() {
+        stepsBar.innerHTML = STEPS.map((s) => {
+          const cls = s.n === step ? 'is-active' : s.n < step ? 'is-done' : '';
+          return `<div class="step ${cls}"><span class="step__num">${s.n}</span>${s.label}</div>`;
+        }).join('');
+      }
+
+      function renderStep1() {
+        const complexes = catalog.complexes.filter((c) => c.published && c.cityId === cityId);
+        const apartments = state.complexId
+          ? catalog.apartments.filter((a) => a.complexId === state.complexId && a.published)
+          : [];
+
+        let html = `<h2 class="step-title">Шаг 1. Выберите квартиру</h2>
+          <p class="step-sub">Сначала жилой комплекс, затем планировка. Площадь квартиры — основа расчёта сметы.</p>
+          <div class="field" style="max-width:420px;margin-bottom:var(--space-6)">
+            <label class="field__label" for="cfg-complex">Жилой комплекс</label>
+            <select class="select" id="cfg-complex">
+              <option value="">— Выберите ЖК —</option>
+              ${complexes.map((c) => `<option value="${c.id}" ${c.id === state.complexId ? 'selected' : ''}>${UI.escapeHtml(c.name)}</option>`).join('')}
+            </select>
+          </div>`;
+
+        if (apartments.length) {
+          html += `<div class="grid grid--auto-sm" id="cfg-apartments">${apartments
+            .map((a) => {
+              const info = APARTMENT_TYPES[a.type];
+              const selected = a.id === state.apartmentId;
+              return `
+              <label class="select-card ${selected ? 'is-selected' : ''}" data-apartment="${a.id}">
+                <span class="select-card__check" aria-hidden="true"></span>
+                <div style="margin-bottom:var(--space-3)">${planSvg(a)}</div>
+                <div class="select-card__title">${info.label} · ${a.area} м²</div>
+                <div class="select-card__text">${a.rooms} комн. · ${UI.escapeHtml(a.description.slice(0, 60))}…</div>
+              </label>`;
+            })
+            .join('')}</div>`;
+        } else if (state.complexId) {
+          const selectedType = state.customType || 'one';
+          const selectedArea = Number(state.customArea) || 40;
+          html += `
+            <div class="notice" style="margin-bottom:var(--space-5)"><span class="notice__mark">i</span><span>Подтверждённые планировки пока не импортированы. Чтобы не подменять их выдуманными схемами, можно сделать предварительный расчёт только по введённой площади. Это не карточка реальной квартиры.</span></div>
+            <div class="grid grid--2" style="max-width:700px">
+              <div class="field">
+                <label class="field__label" for="custom-area">Площадь для расчёта, м²</label>
+                <input class="input" id="custom-area" type="number" min="15" max="300" step="0.1" value="${selectedArea}" required>
+                <small class="field__hint">Введите площадь из документа или официальной планировки</small>
+              </div>
+              <div class="field">
+                <label class="field__label" for="custom-type">Тип помещения</label>
+                <select class="select" id="custom-type">
+                  ${Object.entries(APARTMENT_TYPES).map(([key, info]) => `<option value="${key}" ${key === selectedType ? 'selected' : ''}>${UI.escapeHtml(info.label)}</option>`).join('')}
+                </select>
+                <small class="field__hint">Тип влияет на предварительный подсчёт дверей и состава работ</small>
+              </div>
+            </div>
+            <button class="btn btn--secondary btn--sm" id="open-official-listing" type="button">Посмотреть реальные планировки у застройщика ↗</button>`;
+        }
+
+        contentEl.innerHTML = html;
+
+        const complexSel = document.getElementById('cfg-complex');
+        if (complexSel) {
+          complexSel.addEventListener('change', () => {
+            state.complexId = complexSel.value || null;
+            state.apartmentId = null; /* сброс несовместимой квартиры */
+            save();
+            renderStep1();
+            updateSidebar();
+          });
+        }
+
+        const areaInput = document.getElementById('custom-area');
+        const typeInput = document.getElementById('custom-type');
+        const officialButton = document.getElementById('open-official-listing');
+        if (areaInput && typeInput) {
+          const saveCustomArea = () => {
+            const area = Number(areaInput.value);
+            if (area < 15 || area > 300 || !Number.isFinite(area)) {
+              state.apartmentId = null;
+              UI.toast('Введите площадь от 15 до 300 м²');
+              save();
+              updateSidebar();
+              return;
+            }
+            state.apartmentId = 'custom-area';
+            state.customArea = area;
+            state.customType = typeInput.value;
+            state.customRooms = ({ studio: 1, one: 2, 'euro-two': 2, two: 3, three: 4 })[typeInput.value] || 2;
+            save();
+            updateSidebar();
+          };
+          areaInput.addEventListener('change', saveCustomArea);
+          typeInput.addEventListener('change', saveCustomArea);
+          saveCustomArea();
+        }
+        if (officialButton) {
+          officialButton.addEventListener('click', () => {
+            const complex = currentComplex();
+            if (complex && complex.sourceUrl) window.open(complex.sourceUrl, '_blank', 'noopener,noreferrer');
+          });
+        }
+
+        UI.qsa('[data-apartment]', contentEl).forEach((card) => {
+          card.addEventListener('click', () => {
+            state.apartmentId = card.dataset.apartment;
+            save();
+            UI.qsa('[data-apartment]', contentEl).forEach((c) => c.classList.remove('is-selected'));
+            card.classList.add('is-selected');
+            updateSidebar();
+          });
+        });
+      }
+
+      function renderStep2() {
+        const designs = catalog.designs.filter((d) => d.published);
+        contentEl.innerHTML = `
+          <h2 class="step-title">Шаг 2. Выберите дизайн-проект</h2>
+          <p class="step-sub">Направление задаёт палитру, материалы и уровень комплектации.</p>
+          <div class="grid grid--auto-sm">${designs
+            .map((d) => {
+              const selected = d.id === state.designId;
+              return `
+              <label class="select-card ${selected ? 'is-selected' : ''}" data-design="${d.id}">
+                <span class="select-card__check" aria-hidden="true"></span>
+                <div class="card__media" style="aspect-ratio:16/10;border-radius:var(--radius-sm);margin-bottom:var(--space-4)">
+                  <img class="card__img" src="${d.image}" alt="${UI.escapeHtml(d.name)}" loading="lazy">
+                </div>
+                <div class="select-card__title">${UI.escapeHtml(d.name)}</div>
+                <div class="select-card__text">${UI.escapeHtml(d.style)} · ${UI.escapeHtml(d.priceLevel)}</div>
+              </label>`;
+            })
+            .join('')}</div>`;
+
+        UI.qsa('[data-design]', contentEl).forEach((card) => {
+          card.addEventListener('click', () => {
+            state.designId = card.dataset.design;
+            save();
+            UI.qsa('[data-design]', contentEl).forEach((c) => c.classList.remove('is-selected'));
+            card.classList.add('is-selected');
+            updateSidebar();
+          });
+        });
+      }
+
+      function renderStep3() {
+        const pkgs = catalog.packages.filter((p) => p.published);
+        contentEl.innerHTML = `
+          <h2 class="step-title">Шаг 3. Выберите комплектацию</h2>
+          <p class="step-sub">Комплектация определяет базовую ставку работ и черновых материалов за квадратный метр.</p>
+          <div class="grid grid--auto-sm">${pkgs
+            .map((p) => {
+              const selected = p.id === state.packageId;
+              const rate = p.worksRate + p.roughRate;
+              return `
+              <label class="select-card ${selected ? 'is-selected' : ''}" data-package="${p.id}">
+                <span class="select-card__check" aria-hidden="true"></span>
+                <div class="select-card__title">${UI.escapeHtml(p.name)}</div>
+                <div class="select-card__text">${UI.escapeHtml(p.description)}</div>
+                <div class="select-card__price">${UI.formatMoney(rate)} / м²</div>
+              </label>`;
+            })
+            .join('')}</div>`;
+
+        UI.qsa('[data-package]', contentEl).forEach((card) => {
+          card.addEventListener('click', () => {
+            state.packageId = card.dataset.package;
+            save();
+            UI.qsa('[data-package]', contentEl).forEach((c) => c.classList.remove('is-selected'));
+            card.classList.add('is-selected');
+            updateSidebar();
+          });
+        });
+      }
+
+      function renderStep4() {
+        const pkg = currentPackage();
+        const apartment = currentApartment();
+        if (!pkg || !apartment) {
+          contentEl.innerHTML = UI.emptyState('Нужна квартира и комплектация', 'Вернитесь на предыдущие шаги.', '<button class="btn btn--primary" data-goto="1">К шагу 1</button>');
+          bindGoto();
+          return;
+        }
+
+        /* Автоподбор материалов по умолчанию */
+        if (!state.materials || typeof state.materials !== 'object') state.materials = {};
+        for (const cat of MATERIAL_CATEGORIES) {
+          if (!state.materials[cat.key]) {
+            const candidates = catalog.materials.filter((m) => m.category === cat.key && (m.includedIn || []).includes(pkg.slug));
+            const first = candidates[0] || catalog.materials.find((m) => m.category === cat.key);
+            if (first) state.materials[cat.key] = first.id;
+          }
+        }
+        save();
+
+        let html = `<h2 class="step-title">Шаг 4. Отделочные материалы</h2>
+          <p class="step-sub">По одному материалу на категорию. Материалы, включённые в комплектацию, не увеличивают смету.</p>`;
+
+        for (const cat of MATERIAL_CATEGORIES) {
+          const mats = catalog.materials.filter((m) => m.category === cat.key);
+          html += `<div style="margin-bottom:var(--space-7)">
+            <div class="filter-bar__label" style="margin-bottom:var(--space-3)">${cat.label}</div>
+            <div class="grid grid--auto-sm">${mats
+              .map((m) => {
+                const selected = state.materials[cat.key] === m.id;
+                const included = (m.includedIn || []).includes(pkg.slug);
+                const qty = Estimate.quantityFor(m, apartment);
+                return `
+                <label class="select-card ${selected ? 'is-selected' : ''}" data-material="${m.id}" data-cat="${cat.key}">
+                  <span class="select-card__check" aria-hidden="true"></span>
+                  <div class="select-card__title" style="font-size:0.95rem">${UI.escapeHtml(m.name)}</div>
+                  <div class="select-card__text">${UI.escapeHtml(m.description)}</div>
+                  <div class="select-card__price" style="font-size:0.9rem">
+                    ${included ? 'Включено в комплектацию' : `${UI.formatMoney(m.price)} / ${m.unit}`}
+                  </div>
+                </label>`;
+              })
+              .join('')}</div>
+          </div>`;
+        }
+
+        contentEl.innerHTML = html;
+
+        UI.qsa('[data-material]', contentEl).forEach((card) => {
+          card.addEventListener('click', () => {
+            state.materials[card.dataset.cat] = card.dataset.material;
+            save();
+            UI.qsa(`[data-cat="${card.dataset.cat}"]`, contentEl).forEach((c) => c.classList.remove('is-selected'));
+            card.classList.add('is-selected');
+            updateSidebar();
+          });
+        });
+      }
+
+      function renderStep5() {
+        const kitchens = catalog.kitchens;
+        contentEl.innerHTML = `
+          <h2 class="step-title">Шаг 5. Кухня</h2>
+          <p class="step-sub">Кухонный гарнитур с техникой и столешницей — отдельная позиция сметы.</p>
+          <div class="grid grid--auto-sm">${kitchens
+            .map((k) => {
+              const selected = k.id === state.kitchenId;
+              return `
+              <label class="select-card ${selected ? 'is-selected' : ''}" data-kitchen="${k.id}">
+                <span class="select-card__check" aria-hidden="true"></span>
+                <div class="select-card__title">${UI.escapeHtml(k.name)}</div>
+                <div class="select-card__text">${UI.escapeHtml(k.description)}</div>
+                <div class="select-card__price">${UI.formatMoney(k.price)}</div>
+              </label>`;
+            })
+            .join('')}</div>`;
+
+        UI.qsa('[data-kitchen]', contentEl).forEach((card) => {
+          card.addEventListener('click', () => {
+            state.kitchenId = card.dataset.kitchen;
+            save();
+            UI.qsa('[data-kitchen]', contentEl).forEach((c) => c.classList.remove('is-selected'));
+            card.classList.add('is-selected');
+            updateSidebar();
+          });
+        });
+      }
+
+      function renderStep6() {
+        const apartment = currentApartment();
+        const area = apartment ? apartment.area : 0;
+        contentEl.innerHTML = `
+          <h2 class="step-title">Шаг 6. Дополнительные опции</h2>
+          <p class="step-sub">Опциональные решения: тёплый пол, шумоизоляция, системы хранения и другое.</p>
+          <div class="grid grid--auto-sm">${catalog.options
+            .map((o) => {
+              const qty = Estimate.optionQuantity(o, area);
+              const checked = (state.options || []).includes(o.id);
+              return `
+              <label class="select-card ${checked ? 'is-selected' : ''}" data-option="${o.id}">
+                <span class="select-card__check" aria-hidden="true"></span>
+                <div class="select-card__title" style="font-size:0.95rem">${UI.escapeHtml(o.name)}</div>
+                <div class="select-card__text">${UI.escapeHtml(o.description)}</div>
+                <div class="select-card__price" style="font-size:0.9rem">${UI.formatMoney(o.price * qty)} · ${qty} ${o.unit}</div>
+              </label>`;
+            })
+            .join('')}</div>`;
+
+        UI.qsa('[data-option]', contentEl).forEach((card) => {
+          card.addEventListener('click', () => {
+            const id = card.dataset.option;
+            const list = state.options || [];
+            const idx = list.indexOf(id);
+            if (idx >= 0) list.splice(idx, 1);
+            else list.push(id);
+            state.options = list;
+            save();
+            card.classList.toggle('is-selected', idx < 0);
+            updateSidebar();
+          });
+        });
+      }
+
+      function renderStep7() {
+        const apartment = currentApartment();
+        const complex = currentComplex();
+        const design = currentDesign();
+        const pkg = currentPackage();
+        const kitchen = currentKitchen();
+        const est = liveEstimate();
+
+        const rows = [
+          { l: 'Жилой комплекс', v: complex ? complex.name : '—' },
+          { l: 'Квартира', v: apartment ? `${APARTMENT_TYPES[apartment.type].label} · ${apartment.area} м²` : '—' },
+          { l: 'Дизайн-проект', v: design ? design.name : '—' },
+          { l: 'Комплектация', v: pkg ? pkg.name : '—' },
+          { l: 'Кухня', v: kitchen ? kitchen.name : '—' },
+          { l: 'Опции', v: (state.options || []).length ? String(state.options.length) : '—' },
+        ];
+
+        contentEl.innerHTML = `
+          <h2 class="step-title">Шаг 7. Итоговая конфигурация</h2>
+          <p class="step-sub">Проверьте выбор. Любой параметр можно изменить, вернувшись на нужный шаг.</p>
+          <div class="summary-list">${rows
+            .map(
+              (r, i) => `
+              <div class="summary-list__row">
+                <span>${r.l}</span>
+                <span>${UI.escapeHtml(r.v)}</span>
+              </div>`
+            )
+            .join('')}</div>
+          <div class="estimate__meta" style="margin-top:var(--space-6)">
+            <div class="estimate__meta-item">
+              <div class="estimate__meta-label">Предварительная стоимость</div>
+              <div class="estimate__meta-value" style="font-size:1.4rem">${est ? UI.formatMoney(est.total) : '—'}</div>
+            </div>
+            <div class="estimate__meta-item">
+              <div class="estimate__meta-label">За квадратный метр</div>
+              <div class="estimate__meta-value">${est ? UI.formatMoney(est.perM2) : '—'}</div>
+            </div>
+            <div class="estimate__meta-item">
+              <div class="estimate__meta-label">Ориентировочный срок</div>
+              <div class="estimate__meta-value">${est ? est.durationText : '—'}</div>
+            </div>
+          </div>`;
+
+        UI.qsa('[data-goto]', contentEl).forEach((b) => b.addEventListener('click', () => goTo(Number(b.dataset.goto))));
+      }
+
+      function renderStep8() {
+        const est = liveEstimate();
+        if (!est) {
+          contentEl.innerHTML = UI.emptyState('Расчёт недоступен', 'Выберите квартиру и комплектацию.', '<button class="btn btn--primary" data-goto="1">К шагу 1</button>');
+          bindGoto();
+          return;
+        }
+
+        let html = `<h2 class="step-title">Шаг 8. Предварительная смета</h2>
+          <p class="step-sub">Разбивка по группам расходов. Смета пересчитывается автоматически при изменении любого параметра.</p>
+          <div class="estimate">
+            <div class="estimate__head">
+              <div>
+                <div class="estimate__meta-label">${UI.escapeHtml(est.apartment ? APARTMENT_TYPES[est.apartment.type].label + ' · ' + est.apartment.area + ' м²' : '')}</div>
+                <div style="font-family:var(--font-display);font-weight:700;font-size:1.1rem">${est.design ? UI.escapeHtml(est.design.name) : ''} · ${UI.escapeHtml(est.pkg.name)}</div>
+              </div>
+              <div class="no-print" style="display:flex;gap:var(--space-2);flex-wrap:wrap">
+                <button class="btn btn--secondary btn--sm" id="est-print" type="button">Печать</button>
+                <a class="btn btn--primary btn--sm" href="request.html">Оформить заявку</a>
+              </div>
+            </div>
+            <div class="estimate__body">`;
+
+        for (const g of est.groups) {
+          html += `<div class="estimate__group">
+            <div class="estimate__group-title">${UI.escapeHtml(g.group)}</div>`;
+          for (const r of g.rows) {
+            html += `<div class="estimate__row ${r.included ? 'estimate__row--included' : ''}">
+              <div class="estimate__row-name">${UI.escapeHtml(r.label)}${r.note ? `<span class="estimate__row-note">${UI.escapeHtml(r.note)}</span>` : ''}</div>
+              <div class="estimate__row-value">${r.included ? 'включено' : UI.formatMoney(r.value)}</div>
+            </div>`;
+          }
+          html += `</div>`;
+        }
+
+        html += `
+            <div class="estimate__row estimate__row--total">
+              <div class="estimate__row-name">Итого</div>
+              <div class="estimate__row-value">${UI.formatMoney(est.total)}</div>
+            </div>
+            <div class="estimate__meta">
+              <div class="estimate__meta-item"><div class="estimate__meta-label">За квадратный метр</div><div class="estimate__meta-value">${UI.formatMoney(est.perM2)}</div></div>
+              <div class="estimate__meta-item"><div class="estimate__meta-label">Ориентировочный срок</div><div class="estimate__meta-value">${est.durationText}</div></div>
+              <div class="estimate__meta-item"><div class="estimate__meta-label">Площадь</div><div class="estimate__meta-value">${est.area} м²</div></div>
+            </div>
+            <p class="estimate__disclaimer">Предварительный расчёт носит информационный характер. Финальная стоимость и сроки определяются после уточнения параметров объекта и согласования состава работ.</p>
+          </div>
+        </div>`;
+
+        contentEl.innerHTML = html;
+
+        const printBtn = document.getElementById('est-print');
+        if (printBtn) printBtn.addEventListener('click', () => window.print());
+
+        UI.qsa('[data-goto]', contentEl).forEach((b) => b.addEventListener('click', () => goTo(Number(b.dataset.goto))));
+      }
+
+      function bindGoto() {
+        UI.qsa('[data-goto]', contentEl).forEach((b) => b.addEventListener('click', () => goTo(Number(b.dataset.goto))));
+      }
+
+      /* ---------- Сайдбар ---------- */
+
+      function updateSidebar() {
+        const complex = currentComplex();
+        const apartment = currentApartment();
+        const design = currentDesign();
+        const pkg = currentPackage();
+        const est = liveEstimate();
+
+        const rows = [
+          { l: 'ЖК', v: complex ? complex.name : '—' },
+          { l: 'Квартира', v: apartment ? `${APARTMENT_TYPES[apartment.type].short} · ${apartment.area} м²` : '—' },
+          { l: 'Дизайн', v: design ? design.name : '—' },
+          { l: 'Комплектация', v: pkg ? pkg.name : '—' },
+        ];
+
+        document.getElementById('side-summary').innerHTML = rows
+          .map((r) => `<div class="config-side__row"><span>${r.l}</span><span>${UI.escapeHtml(r.v)}</span></div>`)
+          .join('');
+
+        document.getElementById('side-total').textContent = est ? UI.formatMoney(est.total) : '—';
+
+        btnPrev.disabled = step <= 1;
+        btnNext.textContent = step === 8 ? 'Оформить заявку' : step === 7 ? 'К смете →' : 'Далее →';
+        btnNext.hidden = false;
+      }
+
+      /* ---------- Навигация ---------- */
+
+      function stepValid() {
+        if (step === 1) return !!state.apartmentId;
+        if (step === 2) return !!state.designId;
+        if (step === 3) return !!state.packageId;
+        if (step === 4) return !!state.apartmentId && !!state.packageId;
+        if (step === 5) return !!state.kitchenId;
+        if (step === 6) return true;
+        if (step === 7) return true;
+        return true;
+      }
+
+      function goTo(n) {
+        step = n;
+        save();
+        render();
+      }
+
+      btnPrev.addEventListener('click', () => {
+        if (step > 1) goTo(step - 1);
+      });
+
+      btnNext.addEventListener('click', () => {
+        if (step === 8) {
+          window.location.href = 'request.html';
+          return;
+        }
+        if (!stepValid()) {
+          UI.toast('Сначала сделайте выбор на этом шаге');
+          return;
+        }
+        goTo(step + 1);
+      });
+
+      function render() {
+        renderStepsBar();
+        switch (step) {
+          case 1: renderStep1(); break;
+          case 2: renderStep2(); break;
+          case 3: renderStep3(); break;
+          case 4: renderStep4(); break;
+          case 5: renderStep5(); break;
+          case 6: renderStep6(); break;
+          case 7: renderStep7(); break;
+          case 8: renderStep8(); break;
+        }
+        updateSidebar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      render();
+    });
+  </script>
+</body>
+</html>

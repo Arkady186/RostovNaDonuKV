@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Демонстрационный договор — КВАДРАТ</title>
+  <meta name="description" content="Демонстрационный договор: состав заказа, услуги и стоимость.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Демонстрационный договор</h1>
+        <p class="page-hero__sub">
+          Состав заказа, выбранные услуги и стоимость. Документ не имеет юридической силы
+          и не предполагает подписания или оплаты.
+        </p>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container container--narrow">
+        <div id="contract-root"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'contract';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const config = Store.getConfig();
+      const est = Estimate.calculate(config);
+
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Договор' },
+      ]);
+
+      const root = document.getElementById('contract-root');
+
+      if (!est) {
+        root.innerHTML = UI.emptyState(
+          'Договор пока не сформирован',
+          'Сначала соберите конфигурацию ремонта.',
+          '<a class="btn btn--primary" href="configurator.html">Открыть конфигуратор</a>'
+        );
+        return;
+      }
+
+      const complex = catalog.complexes.find((c) => c.id === config.complexId);
+      const design = catalog.designs.find((d) => d.id === config.designId);
+      const kitchen = catalog.kitchens.find((k) => k.id === config.kitchenId);
+      const date = new Date().toLocaleDateString('ru-RU');
+
+      const services = [
+        { name: 'Дизайн-проект', value: design ? design.name : '—' },
+        { name: 'Комплектация', value: est.pkg.name },
+        { name: 'Кухня', value: kitchen ? kitchen.name : '—' },
+        { name: 'Дополнительные опции', value: (config.options || []).length ? String(config.options.length) + ' шт.' : '—' },
+      ];
+
+      root.innerHTML = `
+        <div class="estimate">
+          <div class="estimate__head">
+            <div>
+              <div class="estimate__meta-label">Договор № ДЕМО-${String(Date.now()).slice(-6)}</div>
+              <div style="font-family:var(--font-display);font-weight:700;font-size:1.15rem">Предварительный расчёт ремонта</div>
+            </div>
+            <span class="badge badge--demo">Демонстрационный документ</span>
+          </div>
+          <div class="estimate__body">
+            <div class="estimate__group">
+              <div class="estimate__group-title">Объект</div>
+              <div class="estimate__row"><div class="estimate__row-name">Жилой комплекс</div><div class="estimate__row-value">${UI.escapeHtml(complex ? complex.name : '—')}</div></div>
+              <div class="estimate__row"><div class="estimate__row-name">Квартира</div><div class="estimate__row-value">${APARTMENT_TYPES[est.apartment.type].label} · ${est.apartment.area} м²</div></div>
+              <div class="estimate__row"><div class="estimate__row-name">Дата формирования</div><div class="estimate__row-value">${date}</div></div>
+            </div>
+            <div class="estimate__group">
+              <div class="estimate__group-title">Услуги</div>
+              ${services
+                .map((s) => `<div class="estimate__row"><div class="estimate__row-name">${s.name}</div><div class="estimate__row-value">${UI.escapeHtml(s.value)}</div></div>`)
+                .join('')}
+            </div>
+            <div class="estimate__group">
+              <div class="estimate__group-title">Стоимость</div>
+              <div class="estimate__row"><div class="estimate__row-name">Предварительная стоимость</div><div class="estimate__row-value">${UI.formatMoney(est.total)}</div></div>
+              <div class="estimate__row"><div class="estimate__row-name">За квадратный метр</div><div class="estimate__row-value">${UI.formatMoney(est.perM2)}</div></div>
+              <div class="estimate__row"><div class="estimate__row-name">Ориентировочный срок</div><div class="estimate__row-value">${est.durationText}</div></div>
+            </div>
+            <p class="estimate__disclaimer">
+              Документ носит демонстрационный характер: не является офертой, не предполагает
+              юридического подписания и оплаты. Финальная стоимость и сроки определяются после
+              уточнения параметров объекта и согласования состава работ.
+            </p>
+            <div class="no-print" style="display:flex;gap:var(--space-3);margin-top:var(--space-6);flex-wrap:wrap">
+              <a class="btn btn--primary" href="request.html">Оформить заявку</a>
+              <a class="btn btn--secondary" href="estimate.html">Вернуться к смете</a>
+            </div>
+          </div>
+        </div>`;
+    });
+  </script>
+</body>
+</html>

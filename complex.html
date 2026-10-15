@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЖК «Октябрь Парк» — КВАДРАТ</title>
+  <meta name="description" content="Жилой комплекс Октябрь Парк: галерея, описание, планировки и предварительный расчёт ремонта.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <div id="complex-head"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="grid grid--2" style="align-items:start;gap:var(--space-9)">
+          <div>
+            <div class="gallery" id="complex-gallery"></div>
+          </div>
+          <div>
+            <div class="section__eyebrow">О комплексе</div>
+            <h2 class="section__title" id="complex-title"></h2>
+            <p class="section__sub" id="complex-desc" style="margin-top:var(--space-4)"></p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-5)" id="complex-badges"></div>
+            <div class="grid grid--2" style="margin-top:var(--space-7);gap:var(--space-4)" id="complex-stats"></div>
+            <div class="hero__actions" style="margin-top:var(--space-7)">
+              <a class="btn btn--primary btn--lg" id="complex-cta" href="#">Выбрать квартиру</a>
+              <a class="btn btn--secondary btn--lg" id="complex-config" href="#">Рассчитать ремонт</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight section--alt">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Планировки</div>
+            <h2 class="section__title">Квартиры в этом ЖК</h2>
+            <p class="section__sub">Демонстрационные планировки. Площади являются ориентировочными и не являются официальными характеристиками ЖК.</p>
+          </div>
+          <a class="btn btn--secondary section__action" id="complex-all-apts" href="#">Все планировки</a>
+        </div>
+        <div class="grid grid--auto" id="complex-apartments"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="section__head">
+          <div>
+            <div class="section__eyebrow">Дизайн-проекты</div>
+            <h2 class="section__title">Подходящие направления интерьера</h2>
+          </div>
+        </div>
+        <div class="grid grid--auto" id="complex-designs"></div>
+      </div>
+    </section>
+
+    <section class="section section--tight">
+      <div class="container">
+        <div class="cta-banner">
+          <h2 class="cta-banner__title">Посчитайте ремонт в «Октябрь Парк»</h2>
+          <p class="cta-banner__text">
+            Выберите планировку, дизайн и комплектацию — предварительная смета
+            сформируется автоматически и сохранится в вашем браузере.
+          </p>
+          <a class="btn btn--light btn--lg" id="complex-cta2" href="#">Рассчитать ремонт</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'complex';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalog = Store.getCatalog();
+      const slug = UI.getParam('slug');
+      const complex = catalog.complexes.find((c) => c.slug === slug && c.published);
+
+      if (!complex) {
+        document.getElementById('complex-head').innerHTML =
+          '<h1 class="page-hero__title">Жилой комплекс не найден</h1>' +
+          '<p class="page-hero__sub">Возможно, запись была скрыта или удалена.</p>';
+        document.getElementById('complex-apartments').innerHTML =
+          UI.emptyState('Ничего не найдено', 'Вернитесь в каталог жилых комплексов.', '<a class="btn btn--primary" href="complexes.html">К каталогу</a>');
+        return;
+      }
+
+      const dev = catalog.developers.find((d) => d.id === complex.developerId);
+      const city = catalog.cities.find((c) => c.id === complex.cityId);
+      const apartments = catalog.apartments.filter((a) => a.complexId === complex.id && a.published);
+      const designs = catalog.designs.filter((d) => d.published).slice(0, 3);
+
+      document.title = `ЖК «${complex.name}» — КВАДРАТ`;
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' },
+        { label: 'Жилые комплексы', href: 'complexes.html' },
+        { label: complex.name },
+      ]);
+
+      document.getElementById('complex-head').innerHTML = `
+        <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap;margin-top:var(--space-5)">
+          <h1 class="page-hero__title" style="margin-top:0">ЖК «${UI.escapeHtml(complex.name)}»</h1>
+          <button class="card__fav ${Store.isFavorite('complexes', complex.id) ? 'is-active' : ''}" data-fav="complexes" data-id="${complex.id}" aria-label="В избранное" style="position:static;width:44px;height:44px">♡</button>
+        </div>
+        <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-4)">
+          <span class="badge badge--sand">${UI.escapeHtml(dev ? dev.name : '')}</span>
+          <span class="badge badge--outline">${UI.escapeHtml(city ? city.name : '')}</span>
+          ${complex.demo ? '<span class="badge badge--demo">Демонстрационные данные</span>' : ''}
+        </div>`;
+
+      /* Галерея */
+      const galleryEl = document.getElementById('complex-gallery');
+      const images = complex.gallery && complex.gallery.length ? complex.gallery : [complex.image];
+      galleryEl.innerHTML = `
+        <div class="gallery__main"><img id="gallery-main" src="${images[0]}" alt="${UI.escapeHtml(complex.name)}"><span class="photo-credit">${complex.imageKind === 'official' ? 'Материал с сайта застройщика' : 'Иллюстрация, не фотография ЖК'}</span></div>
+        <div class="gallery__thumbs">
+          ${images.map((src, i) => `<button class="gallery__thumb ${i === 0 ? 'is-active' : ''}" data-src="${src}" aria-label="Фото ${i + 1}"><img src="${src}" alt="" loading="lazy"></button>`).join('')}
+        </div>`;
+      UI.qsa('.gallery__thumb', galleryEl).forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          UI.qsa('.gallery__thumb', galleryEl).forEach((t) => t.classList.remove('is-active'));
+          thumb.classList.add('is-active');
+          document.getElementById('gallery-main').src = thumb.dataset.src;
+        });
+      });
+
+      document.getElementById('complex-title').textContent = `ЖК «${complex.name}»`;
+      document.getElementById('complex-desc').textContent = complex.description;
+
+      document.getElementById('complex-badges').innerHTML = [
+        complex.class ? `<span class="tag">Класс: ${UI.escapeHtml(complex.class)}</span>` : '',
+        complex.floors ? `<span class="tag">Этажность: ${UI.escapeHtml(complex.floors)}</span>` : '',
+        complex.year ? `<span class="tag">Год/срок: ${UI.escapeHtml(String(complex.year))}</span>` : '',
+        complex.address ? `<span class="tag">${UI.escapeHtml(complex.address)}</span>` : '',
+      ].filter(Boolean).join('');
+
+      const verifiedFacts = [
+        complex.address ? { n: complex.address, l: 'адрес' } : null,
+        complex.class ? { n: complex.class, l: 'класс' } : null,
+        complex.floors ? { n: complex.floors, l: 'этажность' } : null,
+        { n: apartments.length, l: 'проверенных планировок в каталоге' },
+      ].filter(Boolean);
+      document.getElementById('complex-stats').innerHTML = verifiedFacts
+        .map((s) => `<div class="estimate__meta-item"><div class="estimate__meta-label">${UI.escapeHtml(s.l)}</div><div class="estimate__meta-value">${UI.escapeHtml(String(s.n))}</div></div>`)
+        .join('');
+
+      const aptUrl = `apartments.html?complex=${complex.slug}`;
+      const cfgUrl = `configurator.html?complex=${complex.slug}`;
+      const hasVerifiedApartments = apartments.length > 0;
+      document.getElementById('complex-cta').href = hasVerifiedApartments ? aptUrl : (complex.sourceUrl || '#');
+      document.getElementById('complex-cta').textContent = hasVerifiedApartments ? 'Выбрать квартиру' : 'Квартиры у застройщика';
+      document.getElementById('complex-cta').target = hasVerifiedApartments ? '_self' : '_blank';
+      document.getElementById('complex-cta').rel = hasVerifiedApartments ? '' : 'noopener noreferrer';
+      document.getElementById('complex-config').href = hasVerifiedApartments ? cfgUrl : '#complex-apartments';
+      document.getElementById('complex-config').textContent = hasVerifiedApartments ? 'Рассчитать ремонт' : 'Сначала выбрать реальную планировку';
+      document.getElementById('complex-all-apts').href = hasVerifiedApartments ? aptUrl : (complex.sourceUrl || '#');
+      document.getElementById('complex-all-apts').textContent = hasVerifiedApartments ? 'Все планировки' : 'Планировки на сайте застройщика';
+      document.getElementById('complex-all-apts').target = hasVerifiedApartments ? '_self' : '_blank';
+      document.getElementById('complex-all-apts').rel = hasVerifiedApartments ? '' : 'noopener noreferrer';
+      document.getElementById('complex-cta2').href = hasVerifiedApartments ? cfgUrl : (complex.sourceUrl || '#');
+      document.getElementById('complex-cta2').textContent = hasVerifiedApartments ? 'Рассчитать ремонт' : 'Проверить квартиры у застройщика';
+      if (!hasVerifiedApartments) {
+        document.getElementById('complex-cta2').target = '_blank';
+        document.getElementById('complex-cta2').rel = 'noopener noreferrer';
+      }
+      const sourceLink = complex.sourceUrl
+        ? `<p class="source-note">Данные сверены с официальным сайтом. Доступность, цены и сроки могут меняться. <a href="${complex.sourceUrl}" target="_blank" rel="noopener noreferrer">${UI.escapeHtml(complex.sourceName || 'Перейти к первоисточнику')} ↗</a></p>`
+        : '<p class="source-note">Источник данных не указан; перед публикацией требуется проверка.</p>';
+      document.getElementById('complex-desc').insertAdjacentHTML('afterend', sourceLink);
+
+      /* Квартиры */
+      document.getElementById('complex-apartments').innerHTML = apartments
+        .map((a) => {
+          const info = APARTMENT_TYPES[a.type];
+          const cfg = { ...Store.getConfig(), complexId: complex.id, apartmentId: a.id, packageId: Store.getConfig().packageId || 'pkg-comfort' };
+          const est = Estimate.calculate(cfg);
+          return `
+          <article class="card card--link">
+            <div class="card__body">
+              <div class="card__meta">
+                <span class="badge badge--sand">${info.label}</span>
+                <span class="tag">${a.area} м²</span>
+                <span class="tag">${a.rooms} комн.</span>
+              </div>
+              <h3 class="card__title"><a href="apartment.html?complex=${complex.slug}&id=${a.id}">${info.label} · ${a.area} м²</a></h3>
+              <p class="card__text">${UI.escapeHtml(a.description)}</p>
+              <div class="card__footer">
+                <div>
+                  <span class="price__label">Ремонт от</span>
+                  <span class="price">${est ? UI.formatMoney(est.total) : '—'}</span>
+                </div>
+                <a class="btn btn--primary btn--sm" href="apartment.html?complex=${complex.slug}&id=${a.id}">Выбрать</a>
+              </div>
+            </div>
+          </article>`;
+        })
+        .join('');
+
+      if (!apartments.length) {
+        const officialCta = complex.sourceUrl
+          ? `<a class="btn btn--primary btn--sm" href="${complex.sourceUrl}" target="_blank" rel="noopener noreferrer">Открыть реальные планировки ↗</a>`
+          : '';
+        document.getElementById('complex-apartments').innerHTML = UI.emptyState(
+          'Планировки не загружены в каталог',
+          'Мы не показываем нарисованные схемы как реальные планировки. Пока можно посмотреть актуальные варианты непосредственно у застройщика.',
+          officialCta
+        );
+      }
+
+      /* Дизайны */
+      document.getElementById('complex-designs').innerHTML = designs
+        .map((d) => `
+          <article class="card card--link">
+            <div class="card__media">
+              <img class="card__img" src="${d.image}" alt="${UI.escapeHtml(d.name)}" loading="lazy">
+            </div>
+            <div class="card__body">
+              <h3 class="card__title"><a href="design.html?slug=${d.slug}">${UI.escapeHtml(d.name)}</a></h3>
+              <div class="card__meta">
+                <span class="tag">${UI.escapeHtml(d.style)}</span>
+                <span class="tag">${UI.escapeHtml(d.priceLevel)}</span>
+              </div>
+              <div class="card__footer">
+                <a class="btn btn--secondary btn--sm" href="configurator.html?complex=${complex.slug}&design=${d.slug}">Выбрать дизайн</a>
+              </div>
+            </div>
+          </article>`)
+        .join('');
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-fav]');
+        if (!btn) return;
+        const added = Store.toggleFavorite(btn.dataset.fav, btn.dataset.id);
+        btn.classList.toggle('is-active', added);
+        UI.updateFavoritesBadge();
+        UI.toast(added ? 'Добавлено в избранное' : 'Удалено из избранного');
+      });
+    });
+  </script>
+</body>
+</html>

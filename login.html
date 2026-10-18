@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход и регистрация — КВАДРАТ</title>
+  <meta name="description" content="Войдите в аккаунт КВАДРАТ или зарегистрируйтесь по номеру телефона.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <main class="auth-page">
+    <div class="container">
+      <div class="auth-layout">
+        <aside class="auth-aside">
+          <h2>Ваш аккаунт КВАДРАТ</h2>
+          <p>Сохраняйте понравившиеся ЖК и дизайн-проекты, возвращайтесь к расчёту с любого устройства и отправляйте заявку менеджеру в один клик.</p>
+          <ul class="auth-perks">
+            <li><span><strong>Избранное</strong><br>ЖК и дизайн-проекты всегда под рукой</span></li>
+            <li><span><strong>Сохранённый расчёт</strong><br>продолжайте с того места, где остановились</span></li>
+            <li><span><strong>Личный менеджер</strong><br>перезвонит и поможет с выбором</span></li>
+            <li><span><strong>Безопасно</strong><br>данные хранятся у нас и не передаются третьим лицам</span></li>
+          </ul>
+        </aside>
+
+        <section class="auth-card">
+          <div id="view-tabs" class="auth-tabs" role="tablist">
+            <button type="button" role="tab" data-tab="login" class="is-active">Вход</button>
+            <button type="button" role="tab" data-tab="register">Регистрация</button>
+          </div>
+
+          <!-- ВХОД -->
+          <form id="form-login" class="auth-form" novalidate autocomplete="on">
+            <h1>С возвращением</h1>
+            <p class="auth-sub">Введите номер телефона и пароль.</p>
+            <div class="auth-msg auth-msg--error" id="login-err" hidden role="alert"></div>
+            <div class="field">
+              <label class="field__label" for="l-phone">Номер телефона</label>
+              <input class="input" id="l-phone" type="tel" inputmode="tel" autocomplete="username" placeholder="+7 (900) 000-00-00">
+            </div>
+            <div class="field">
+              <label class="field__label" for="l-pass">Пароль</label>
+              <div class="pw-wrap">
+                <input class="input" id="l-pass" type="password" autocomplete="current-password" placeholder="Ваш пароль">
+                <button type="button" class="pw-toggle" data-toggle="l-pass">Показать</button>
+              </div>
+            </div>
+            <button class="btn btn--primary btn--lg btn--block" type="submit">Войти</button>
+            <p class="auth-hint" style="text-align:center;margin-top:var(--space-4)">Нет аккаунта? <a href="#register" class="legal-link" data-goto="register">Зарегистрируйтесь</a>. Забыли пароль — позвоните нам, менеджер поможет восстановить доступ.</p>
+          </form>
+
+          <!-- РЕГИСТРАЦИЯ -->
+          <form id="form-register" class="auth-form" novalidate hidden autocomplete="on">
+            <h1>Создайте аккаунт</h1>
+            <p class="auth-sub">Это займёт меньше минуты.</p>
+            <div class="auth-msg auth-msg--error" id="reg-err" hidden role="alert"></div>
+            <div class="field">
+              <label class="field__label" for="r-phone">Номер телефона *</label>
+              <input class="input" id="r-phone" type="tel" inputmode="tel" autocomplete="username" placeholder="+7 (900) 000-00-00">
+              <span class="field__error">Введите российский мобильный номер</span>
+            </div>
+            <div class="field">
+              <label class="field__label" for="r-name">Имя *</label>
+              <input class="input" id="r-name" type="text" autocomplete="given-name" placeholder="Как к вам обращаться" maxlength="60">
+              <span class="field__error">Укажите имя (минимум 2 символа)</span>
+            </div>
+            <div class="field">
+              <label class="field__label" for="r-pass">Придумайте пароль *</label>
+              <div class="pw-wrap">
+                <input class="input" id="r-pass" type="password" autocomplete="new-password" placeholder="Не менее 8 символов">
+                <button type="button" class="pw-toggle" data-toggle="r-pass">Показать</button>
+              </div>
+              <span class="auth-hint">Минимум 8 символов, буквы и цифры</span>
+              <span class="field__error">Пароль: от 8 символов, обязательно буквы и цифры</span>
+            </div>
+            <div class="field">
+              <label class="field__label" for="r-pass2">Повторите пароль *</label>
+              <div class="pw-wrap">
+                <input class="input" id="r-pass2" type="password" autocomplete="new-password" placeholder="Ещё раз пароль">
+                <button type="button" class="pw-toggle" data-toggle="r-pass2">Показать</button>
+              </div>
+              <span class="field__error">Пароли не совпадают</span>
+            </div>
+            <div class="consent-block">
+              <label class="checkbox"><input type="checkbox" id="r-privacy"><span>Я даю согласие на обработку моих персональных данных в соответствии с <a href="privacy.html" target="_blank" rel="noopener">Политикой обработки персональных данных</a> *</span></label>
+              <label class="checkbox"><input type="checkbox" id="r-terms"><span>Я принимаю условия <a href="terms.html" target="_blank" rel="noopener">Пользовательского соглашения</a> *</span></label>
+            </div>
+            <button class="btn btn--primary btn--lg btn--block" type="submit">Зарегистрироваться</button>
+          </form>
+
+          <!-- СМЕНА ПАРОЛЯ -->
+          <form id="form-change" class="auth-form" novalidate hidden>
+            <h1>Задайте новый пароль</h1>
+            <p class="auth-sub">Для безопасности замените временный пароль на свой.</p>
+            <div class="auth-msg auth-msg--error" id="ch-err" hidden role="alert"></div>
+            <div class="field">
+              <label class="field__label" for="c-old">Текущий (временный) пароль</label>
+              <input class="input" id="c-old" type="password" autocomplete="current-password">
+            </div>
+            <div class="field">
+              <label class="field__label" for="c-pass">Новый пароль</label>
+              <input class="input" id="c-pass" type="password" autocomplete="new-password" placeholder="Не менее 8 символов, буквы и цифры">
+            </div>
+            <div class="field">
+              <label class="field__label" for="c-pass2">Повторите новый пароль</label>
+              <input class="input" id="c-pass2" type="password" autocomplete="new-password">
+            </div>
+            <button class="btn btn--primary btn--lg btn--block" type="submit">Сохранить пароль</button>
+          </form>
+
+          <div class="auth-secure">🔒 Пароль хранится только в зашифрованном виде</div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'login';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (id) => document.getElementById(id);
+      const params = new URLSearchParams(location.search);
+      const rawNext = params.get('next') || '';
+      /* Только простые относительные адреса страниц сайта — защита от open redirect */
+      const next = /^[a-z0-9-]+\.html(\?[\w=&%.\-]*)?$/i.test(rawNext) ? rawNext : 'index.html';
+
+      const forms = { login: $('form-login'), register: $('form-register'), change: $('form-change') };
+      const tabs = $('view-tabs');
+
+      function show(view) {
+        Object.keys(forms).forEach((k) => { forms[k].hidden = k !== view; });
+        tabs.hidden = view === 'change';
+        tabs.querySelectorAll('button').forEach((b) => b.classList.toggle('is-active', b.dataset.tab === view));
+        document.title = (view === 'register' ? 'Регистрация' : view === 'change' ? 'Новый пароль' : 'Вход') + ' — КВАДРАТ';
+      }
+      tabs.addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) show(b.dataset.tab); });
+      document.querySelectorAll('[data-goto]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); show(a.dataset.goto); }));
+      document.querySelectorAll('.pw-toggle').forEach((b) => b.addEventListener('click', () => {
+        const i = $(b.dataset.toggle); const hide = i.type === 'text';
+        i.type = hide ? 'password' : 'text'; b.textContent = hide ? 'Показать' : 'Скрыть';
+      }));
+
+      /* Маска телефона +7 (XXX) XXX-XX-XX */
+      function maskPhone(el) {
+        el.addEventListener('input', () => {
+          let d = el.value.replace(/\D/g, '');
+          if (d.startsWith('8')) d = '7' + d.slice(1);
+          if (d && !d.startsWith('7')) d = '7' + d;
+          d = d.slice(0, 11);
+          let out = d ? '+7' : '';
+          if (d.length > 1) out += ' (' + d.slice(1, 4);
+          if (d.length >= 5) out += ') ' + d.slice(4, 7);
+          if (d.length >= 8) out += '-' + d.slice(7, 9);
+          if (d.length >= 10) out += '-' + d.slice(9, 11);
+          el.value = out;
+        });
+      }
+      maskPhone($('l-phone')); maskPhone($('r-phone'));
+      const phoneOk = (v) => /^7\d{10}$/.test(v.replace(/\D/g, ''));
+      const passOk = (v) => v.length >= 8 && v.length <= 128 && /[A-Za-zА-Яа-я]/.test(v) && /\d/.test(v);
+
+      function msg(id, text) { const el = $(id); el.textContent = text || ''; el.hidden = !text; }
+      function bad(el, flag) { el.closest('.field').classList.toggle('has-error', flag); el.classList.toggle('is-invalid', flag); }
+      function busy(form, flag) { const b = form.querySelector('button[type=submit]'); b.disabled = flag; b.dataset.t = b.dataset.t || b.textContent; b.textContent = flag ? 'Подождите…' : b.dataset.t; }
+      function done() { location.href = next; }
+
+      forms.login.addEventListener('submit', async (e) => {
+        e.preventDefault(); msg('login-err');
+        if (!phoneOk($('l-phone').value) || !$('l-pass').value) { msg('login-err', 'Введите номер телефона и пароль'); return; }
+        busy(forms.login, true);
+        try {
+          const u = await Auth.login($('l-phone').value, $('l-pass').value);
+          if (u.mustChange) { show('change'); busy(forms.login, false); $('c-old').value = $('l-pass').value; $('l-pass').value = ''; return; }
+          done();
+        } catch (err) { msg('login-err', err.message); busy(forms.login, false); }
+      });
+
+      forms.register.addEventListener('submit', async (e) => {
+        e.preventDefault(); msg('reg-err');
+        const f = { phone: $('r-phone'), name: $('r-name'), pass: $('r-pass'), pass2: $('r-pass2') };
+        const checks = [
+          [f.phone, !phoneOk(f.phone.value)], [f.name, f.name.value.trim().length < 2],
+          [f.pass, !passOk(f.pass.value)], [f.pass2, f.pass.value !== f.pass2.value || !f.pass2.value],
+        ];
+        let ok = true; checks.forEach(([el, flag]) => { bad(el, flag); if (flag) ok = false; });
+        if (!$('r-privacy').checked || !$('r-terms').checked) { msg('reg-err', 'Для регистрации нужно согласие на обработку персональных данных и принятие пользовательского соглашения'); ok = false; }
+        if (!ok) return;
+        busy(forms.register, true);
+        try {
+          await Auth.register({
+            phone: f.phone.value, name: f.name.value.trim(), password: f.pass.value, password2: f.pass2.value,
+            consentPrivacy: true, consentTerms: true,
+          });
+          done();
+        } catch (err) { msg('reg-err', err.message); busy(forms.register, false); }
+      });
+      ['r-phone', 'r-name', 'r-pass', 'r-pass2'].forEach((id) => $(id).addEventListener('input', () => bad($(id), false)));
+
+      forms.change.addEventListener('submit', async (e) => {
+        e.preventDefault(); msg('ch-err');
+        if (!passOk($('c-pass').value)) { msg('ch-err', 'Новый пароль: от 8 символов, буквы и цифры'); return; }
+        if ($('c-pass').value !== $('c-pass2').value) { msg('ch-err', 'Пароли не совпадают'); return; }
+        busy(forms.change, true);
+        try {
+          await Auth.api('POST', '/api/password', { old: $('c-old').value, password: $('c-pass').value });
+          const staff = Auth.current() && (Auth.current().role !== 'client');
+          location.href = staff ? 'admin.html' : next;
+        } catch (err) { msg('ch-err', err.message); busy(forms.change, false); }
+      });
+
+      /* Стартовое состояние */
+      if (location.hash === '#register') show('register');
+      else if (params.get('change')) show('change');
+      document.addEventListener('auth:ready', (ev) => {
+        const u = ev.detail && ev.detail.user;
+        if (ev.detail && ev.detail.serverDown) { msg('login-err', 'Не удалось связаться с сервером. Обновите страницу или попробуйте позже.'); return; }
+        if (u && u.mustChange) show('change');
+        else if (u && !params.get('change')) done();
+      });
+    });
+  </script>
+</body>
+</html>

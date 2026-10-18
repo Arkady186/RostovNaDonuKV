@@ -115,6 +115,7 @@ const Store = (() => {
   function saveConfig(patch) {
     const next = { ...getConfig(), ...patch };
     write(KEYS.config, next);
+    if (typeof Auth !== 'undefined') Auth.trackConfig(next);
     return next;
   }
 
@@ -128,7 +129,13 @@ const Store = (() => {
     return { complexes: [], apartments: [], designs: [] };
   }
 
+  /* Избранное доступно только после входа (см. js/auth.js) */
+  function authed() {
+    try { return !!localStorage.getItem(PREFIX + 'auth'); } catch (e) { return false; }
+  }
+
   function getFavorites() {
+    if (!authed()) return defaultFavorites();
     const fav = read(KEYS.favorites, null);
     if (!fav || typeof fav !== 'object') return defaultFavorites();
     return {
@@ -143,6 +150,7 @@ const Store = (() => {
   }
 
   function toggleFavorite(type, id) {
+    if (!authed()) return false;
     const fav = getFavorites();
     const list = fav[type];
     const idx = list.indexOf(id);
@@ -152,6 +160,7 @@ const Store = (() => {
       list.push(id);
     }
     write(KEYS.favorites, fav);
+    if (typeof Auth !== 'undefined') Auth.pushFavorites(fav);
     return idx < 0;
   }
 

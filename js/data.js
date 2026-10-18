@@ -4,7 +4,7 @@
    localStorage поверх этих значений (см. store.js).
    ============================================================ */
 
-const KVADRAT_SCHEMA_VERSION = 2;
+const KVADRAT_SCHEMA_VERSION = 3;
 
 /* ---------- Бренд (централизованные настройки) ---------- */
 
@@ -55,12 +55,6 @@ const IMG = {
   interior14: 'https://images.unsplash.com/photo-1616627988260-8a8a1c2b0e5e?auto=format&fit=crop&w=1400&q=80',
   interior15: 'https://images.unsplash.com/photo-1616137466211-f939a420be84?auto=format&fit=crop&w=1400&q=80',
   interior16: 'https://images.unsplash.com/photo-1622372738946-62e02505feb3?auto=format&fit=crop&w=1400&q=80',
-  arch1: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80',
-  arch2: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1600&q=80',
-  arch3: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=80',
-  arch4: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80',
-  arch5: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=80',
-  arch6: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1600&q=80',
   wood: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
   stone: 'https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=1400&q=80',
 };
@@ -102,7 +96,7 @@ const DEFAULT_DEVELOPERS = [
     logoText: 'ССК',
     description:
       'Крупный региональный застройщик с портфелем жилых комплексов бизнес- и комфорт-класса. ' +
-      'Приоритетный партнёр демонстрационной версии сервиса.',
+      'Застройщик ЖК «Октябрь Парк».',
     published: true,
   },
   {
@@ -131,6 +125,29 @@ const DEFAULT_DEVELOPERS = [
 
 /* ---------- Жилые комплексы ---------- */
 
+/* Источники: только официальные сайты застройщиков (проверено 18.10.2026). */
+const KVADRAT_SOURCE_AUDIT_DATE = '2026-10-18';
+const KVADRAT_OFFICIAL_SOURCES = {
+  ssk: 'https://sskuban.ru/rostov-na-donu/',
+  oktyabrPark: 'https://oktyabrskiipark.ru/',
+  sk10Projects: 'https://sk10.ru/projects',
+  kosmos: 'https://sk10.ru/projects/zhk-kosmos',
+  sezony: 'https://sk10.ru/projects/zhk-sezony',
+  kultura: 'https://sk10.ru/projects/zhk-kultura',
+  greenside: 'https://sk10.ru/projects/zhk-grinsajd',
+  donneftestroy: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects',
+  panorama: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects/panorama-na-teatralnom',
+  prityazhenie: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects/prityazhenie',
+  zapadnyeAllei: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects/zapadnye-allei',
+  svoboda: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects/zhk-svoboda',
+  zvezdaStolicy: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects/zhk-zvezda-stolicy',
+};
+
+const _SK = 'https://storage.yandexcloud.net/sk10-media-site/p/pg/gl/';
+const _DN = 'https://img.xn--d1acaqraferjjcw.xn--p1ai/';
+const _CR = 'https://img1.creatium.ru/disk2/';
+
+/* Жилые комплексы Ростова-на-Дону. Фото и факты — с сайтов застройщиков. */
 const DEFAULT_COMPLEXES = [
   {
     id: 'cx-op',
@@ -138,16 +155,23 @@ const DEFAULT_COMPLEXES = [
     name: 'Октябрь Парк',
     developerId: 'dev-ssk',
     cityId: 'c-rostov',
-    class: 'бизнес',
-    address: 'Ростов-на-Дону, район Октябрьского парка',
-    year: 2026,
-    floors: '9–17',
+    class: 'комфорт',
+    address: 'Ростов-на-Дону, ул. Таганрогская, 132/4',
+    year: '',
+    floors: '',
     description:
-      'Жилой комплекс бизнес-класса в зелёной зоне города: закрытая территория, ' +
-      'собственный бульвар, подземный паркинг и квартиры с панорамным остеклением. ' +
-      'Приоритетный объект демонстрационной версии сервиса.',
-    image: IMG.arch1,
-    gallery: [IMG.arch1, IMG.interior1, IMG.interior2, IMG.arch2],
+      'Монолитный жилой комплекс комфорт-класса от ССК. Просторные кухни и кухни-гостиные, ' +
+      'подземный паркинг со входом из лобби, школа в шаговой доступности, безбарьерная среда.',
+    image: _CR + '32/e8/41/c4de64ad1b59b8202951519ad9a89ba134/01j6en9z0rea33kbapjtbvgrw0.jpg',
+    gallery: [
+      _CR + '32/e8/41/c4de64ad1b59b8202951519ad9a89ba134/01j6en9z0rea33kbapjtbvgrw0.jpg',
+      _CR + '8d/cd/b2/2de8c47371ed7319ae02f16e94aa77d685/img_3446.jpg',
+      _CR + 'ca/70/a6/d24fc30e2c321018494dca08adca916860/img_3445.jpg',
+      _CR + '96/e9/73/1f064b8c74a3a4f05998b02330496fa5b3/img_3443.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.oktyabrPark,
+    sourceName: 'Официальный сайт ЖК «Октябрь Парк»',
+    imageKind: 'official',
     priority: true,
     demo: false,
     published: true,
@@ -158,17 +182,22 @@ const DEFAULT_COMPLEXES = [
     name: 'Космос',
     developerId: 'dev-sk10',
     cityId: 'c-rostov',
-    class: 'комфорт',
-    address: 'Ростов-на-Дону, северный жилой район',
-    year: 2025,
-    floors: '12–18',
-    description:
-      'Современный квартал с собственным двором без машин, детскими площадками ' +
-      'и квартирами с продуманными планировками.',
-    image: IMG.arch3,
-    gallery: [IMG.arch3, IMG.interior3, IMG.interior4, IMG.arch4],
-    priority: false,
-    demo: true,
+    class: '',
+    address: 'Ростов-на-Дону, центр города',
+    year: '',
+    floors: '15–24',
+    description: 'ЖК «Космос» от СК10 в центре Ростова-на-Дону. Секции от 15 до 24 этажей.',
+    image: _SK + '139f8756da2301f839b100354ccffa03044582bb.jpg',
+    gallery: [
+      _SK + '139f8756da2301f839b100354ccffa03044582bb.jpg',
+      _SK + '2162fb0ad42c90bb87809ccd0e3246bec5aa1fe1.jpg',
+      _SK + 'd5ced9d1758b2e8698e0538f6e64f87392193fd4.jpg',
+      _SK + '607089e509336c3ec6c5f70983141d8f14725957.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.kosmos,
+    sourceName: 'Официальный сайт СК10',
+    imageKind: 'official',
+    demo: false,
     published: true,
   },
   {
@@ -177,17 +206,21 @@ const DEFAULT_COMPLEXES = [
     name: 'Сезоны',
     developerId: 'dev-sk10',
     cityId: 'c-rostov',
-    class: 'комфорт',
-    address: 'Ростов-на-Дону, левобережная зона',
-    year: 2026,
-    floors: '10–16',
-    description:
-      'Жилой комплекс с ландшафтным парком и видовыми квартирами. ' +
-      'Демонстрационная запись каталога.',
-    image: IMG.arch4,
-    gallery: [IMG.arch4, IMG.interior5, IMG.interior6, IMG.arch5],
-    priority: false,
-    demo: true,
+    class: '',
+    address: 'Ростов-на-Дону, центр города',
+    year: '',
+    floors: '9',
+    description: 'ЖК «Сезоны» от СК10: четыре девятиэтажных дома в центре Ростова-на-Дону.',
+    image: _SK + '7e17535db0780236d648927fc78a3f92220f3268.jpg',
+    gallery: [
+      _SK + '7e17535db0780236d648927fc78a3f92220f3268.jpg',
+      _SK + '797167059bd0b518658e1949a9545e845c350511.webp',
+      _SK + '3bb4f66cb888a9e707ba930fb717567a83208693.webp',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.sezony,
+    sourceName: 'Официальный сайт СК10',
+    imageKind: 'official',
+    demo: false,
     published: true,
   },
   {
@@ -196,17 +229,21 @@ const DEFAULT_COMPLEXES = [
     name: 'Культура',
     developerId: 'dev-sk10',
     cityId: 'c-rostov',
-    class: 'комфорт',
-    address: 'Ростов-на-Дону, центр',
-    year: 2025,
-    floors: '8–14',
-    description:
-      'Камерный комплекс в центральной части города с кирпичной архитектурой ' +
-      'и квартирами с высокими потолками. Демонстрационная запись каталога.',
-    image: IMG.arch5,
-    gallery: [IMG.arch5, IMG.interior7, IMG.interior8, IMG.arch6],
-    priority: false,
-    demo: true,
+    class: 'бизнес',
+    address: 'Ростов-на-Дону, Кировский район, пересечение Театрального проспекта и ул. Текучёва',
+    year: '',
+    floors: '19–25',
+    description: 'ЖК «Культура» от СК10 в Кировском районе Ростова-на-Дону. Секции от 19 до 25 этажей.',
+    image: _SK + '501aaf1ef01f9e04469cde3f8e36374f127b5750.webp',
+    gallery: [
+      _SK + '501aaf1ef01f9e04469cde3f8e36374f127b5750.webp',
+      _SK + '812d4b753c1f946682367e945afd4aa53f50053f.webp',
+      _SK + '7ff745792f398cc34e772aa55bae4394632e0ef5.webp',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.kultura,
+    sourceName: 'Официальный сайт СК10',
+    imageKind: 'official',
+    demo: false,
     published: true,
   },
   {
@@ -215,81 +252,143 @@ const DEFAULT_COMPLEXES = [
     name: 'Гринсайд',
     developerId: 'dev-sk10',
     cityId: 'c-rostov',
-    class: 'бизнес',
-    address: 'Ростов-на-Дону, западный жилой район',
-    year: 2027,
-    floors: '9–15',
-    description:
-      'Комплекс с зелёным бульваром, клубным домом и квартирами с террасами. ' +
-      'Демонстрационная запись каталога.',
-    image: IMG.arch6,
-    gallery: [IMG.arch6, IMG.interior9, IMG.interior10, IMG.arch1],
-    priority: false,
-    demo: true,
+    class: '',
+    address: 'Ростов-на-Дону, район ТРЦ «РИО»',
+    year: '',
+    floors: '18–25',
+    description: 'ЖК «Гринсайд» от СК10 рядом с ТРЦ «РИО». Секции от 18 до 25 этажей.',
+    image: _SK + '9d0841e9dfb981c5c674e56937d9ec6487ba79cc.webp',
+    gallery: [
+      _SK + '9d0841e9dfb981c5c674e56937d9ec6487ba79cc.webp',
+      _SK + 'bff355ce4df800060a6b4676626d57c55df957ce.webp',
+      _SK + 'c4fac12d762265f8eacba5e2d6ecb375020635f1.webp',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.greenside,
+    sourceName: 'Официальный сайт СК10',
+    imageKind: 'official',
+    demo: false,
     published: true,
   },
   {
-    id: 'cx-malina',
-    slug: 'malina-park',
-    name: 'Малина Парк',
-    developerId: 'dev-sk10',
-    cityId: 'c-rostov',
-    class: 'комфорт',
-    address: 'Ростов-на-Дону, северный жилой район',
-    year: 2026,
-    floors: '12–20',
-    description:
-      'Масштабный квартал с собственной инфраструктурой: школы, детские сады, ' +
-      'торговые галереи. Демонстрационная запись каталога.',
-    image: IMG.arch2,
-    gallery: [IMG.arch2, IMG.interior11, IMG.interior12, IMG.arch3],
-    priority: false,
-    demo: true,
-    published: true,
-  },
-  {
-    id: 'cx-rechnoy',
-    slug: 'rechnoy',
-    name: 'Речной',
+    id: 'cx-panorama',
+    slug: 'panorama-na-teatralnom',
+    name: 'Панорама на Театральном',
     developerId: 'dev-dns',
     cityId: 'c-rostov',
-    class: 'комфорт',
-    address: 'Ростов-на-Дону, набережная зона',
-    year: 2026,
-    floors: '10–16',
-    description:
-      'Демонстрационная запись каталога. Данные о комплексе не подтверждены ' +
-      'и используются только для проверки работы сервиса.',
-    image: IMG.arch2,
-    gallery: [IMG.arch2, IMG.interior13, IMG.interior14, IMG.arch4],
-    priority: false,
-    demo: true,
+    class: 'бизнес',
+    address: 'Ростов-на-Дону, Театральный проспект, 62',
+    year: '',
+    floors: '25',
+    description: 'ЖК бизнес-класса «Панорама на Театральном» от ДОННЕФТЕСТРОЯ на Театральном проспекте.',
+    image: _DN + 'rs:fill:1046:542:0/plain/production/1881f73e9e0530d2592708df47e0bfa45c703.jpg',
+    gallery: [
+      _DN + 'rs:fill:1046:542:0/plain/production/1881f73e9e0530d2592708df47e0bfa45c703.jpg',
+      _DN + 'rs:fill:1100:0:0/plain/production/bf574fd4afa239e6953165b47a70a3820c847.jpg',
+      _DN + 'rs:fill:1366:0:0/plain/production/4935f9ab63af0bce7a6adf65fa06e94988c18.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.panorama,
+    sourceName: 'Официальный сайт ДОННЕФТЕСТРОЯ',
+    imageKind: 'official',
+    demo: false,
+    published: true,
+  },
+  {
+    id: 'cx-prityazhenie',
+    slug: 'prityazhenie',
+    name: 'Притяжение',
+    developerId: 'dev-dns',
+    cityId: 'c-rostov',
+    class: 'комфорт+',
+    address: 'Ростов-на-Дону, Левенцовка, ул. Назарько',
+    year: '',
+    floors: '19',
+    description: 'ЖК «Притяжение» от ДОННЕФТЕСТРОЯ в районе Левенцовка, на улице Назарько.',
+    image: _DN + 'rs:fill:1046:542:0/plain/production/741e13dbfafbfcd2179bfd916ae6d52c83cea.jpg',
+    gallery: [
+      _DN + 'rs:fill:1046:542:0/plain/production/741e13dbfafbfcd2179bfd916ae6d52c83cea.jpg',
+      _DN + 'rs:fill:1100:0:0/plain/production/7d7452356b3d0fb9ce8fe68c5713992af28d1.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.prityazhenie,
+    sourceName: 'Официальный сайт ДОННЕФТЕСТРОЯ',
+    imageKind: 'official',
+    demo: false,
+    published: true,
+  },
+  {
+    id: 'cx-zapadnye-alei',
+    slug: 'zapadnye-allei',
+    name: 'Западные Аллеи',
+    developerId: 'dev-dns',
+    cityId: 'c-rostov',
+    class: 'комфорт+',
+    address: 'Ростов-на-Дону, пр. Маршала Жукова / ул. Ткачёва',
+    year: '',
+    floors: '9–19',
+    description: 'ЖК «Западные Аллеи» от ДОННЕФТЕСТРОЯ в Западном жилом массиве. Дома от 9 до 19 этажей.',
+    image: _DN + 'rs:fill:1046:542:0/plain/production/29cb164ca49190a123282b91fc1145791eabd.jpg',
+    gallery: [
+      _DN + 'rs:fill:1046:542:0/plain/production/29cb164ca49190a123282b91fc1145791eabd.jpg',
+      _DN + 'rs:fill:1100:0:0/plain/production/fae91a0ff24a4cb335cd068d16f4fc7f238ec.jpg',
+      _DN + 'rs:fill:1366:0:0/plain/production/de559a648c741c5b0055543e70b80389d16cb.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.zapadnyeAllei,
+    sourceName: 'Официальный сайт ДОННЕФТЕСТРОЯ',
+    imageKind: 'official',
+    demo: false,
+    published: true,
+  },
+  {
+    id: 'cx-svoboda',
+    slug: 'svoboda',
+    name: 'Свобода',
+    developerId: 'dev-dns',
+    cityId: 'c-rostov',
+    class: 'комфорт+',
+    address: 'Ростов-на-Дону, ул. Горсоветская, 49',
+    year: '',
+    floors: '24',
+    description: 'ЖК «Свобода» от ДОННЕФТЕСТРОЯ на улице Горсоветской: два 24-этажных дома.',
+    image: _DN + 'rs:fill:1046:542:0/plain/production/5d18c3bbb38cece50032d4e9d6280670807ec.jpg',
+    gallery: [
+      _DN + 'rs:fill:1046:542:0/plain/production/5d18c3bbb38cece50032d4e9d6280670807ec.jpg',
+      _DN + 'rs:fill:1100:0:0/plain/production/7dfee8a2f9f8b9efa6b6a772111330.jpg',
+      _DN + 'rs:fill:1366:0:0/plain/production/e0284e71aefc39595259e1c801e7d1.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.svoboda,
+    sourceName: 'Официальный сайт ДОННЕФТЕСТРОЯ',
+    imageKind: 'official',
+    demo: false,
+    published: true,
+  },
+  {
+    id: 'cx-zvezda-stolicy-2',
+    slug: 'zvezda-stolicy-2',
+    name: 'Звезда Столицы 2',
+    developerId: 'dev-dns',
+    cityId: 'c-rostov',
+    class: 'бизнес',
+    address: 'Ростов-на-Дону, ул. Нансена',
+    year: '',
+    floors: '25',
+    description: 'ЖК бизнес-класса «Звезда Столицы 2» от ДОННЕФТЕСТРОЯ на улице Нансена.',
+    image: _DN + 'rs:fill:1046:542:0/plain/production/834db263fa194496947fd04d174aa2046ba9a.jpg',
+    gallery: [
+      _DN + 'rs:fill:1046:542:0/plain/production/834db263fa194496947fd04d174aa2046ba9a.jpg',
+      _DN + 'rs:fill:1100:0:0/plain/production/080271aba3cd15ef5b811253934f3b7f43c40.jpg',
+      _DN + 'rs:fill:1366:0:0/plain/production/a69b53de1416b37f94338a81076be7c8b2822.jpg',
+    ],
+    sourceUrl: KVADRAT_OFFICIAL_SOURCES.zvezdaStolicy,
+    sourceName: 'Официальный сайт ДОННЕФТЕСТРОЯ',
+    imageKind: 'official',
+    demo: false,
     published: true,
   },
 ];
 
 /* ---------- Квартиры (демонстрационные планировки) ---------- */
 
-const DEFAULT_APARTMENTS = [
-  { id: 'apt-op-01', complexId: 'cx-op', type: 'studio', area: 25, rooms: 1, published: true, description: 'Компактная студия с объединённой кухней-гостиной и полноценным санузлом.' },
-  { id: 'apt-op-02', complexId: 'cx-op', type: 'one', area: 36, rooms: 2, published: true, description: 'Однокомнатная квартира с отдельной спальней и кухней-гостиной.' },
-  { id: 'apt-op-03', complexId: 'cx-op', type: 'euro-two', area: 42, rooms: 2, published: true, description: 'Евродвушка: просторная кухня-гостиная и изолированная спальня.' },
-  { id: 'apt-op-04', complexId: 'cx-op', type: 'two', area: 55, rooms: 3, published: true, description: 'Двухкомнатная квартира с двумя изолированными комнатами.' },
-  { id: 'apt-op-05', complexId: 'cx-op', type: 'three', area: 68, rooms: 4, published: true, description: 'Трёхкомнатная квартира с гардеробной и просторной гостиной.' },
-  { id: 'apt-ks-01', complexId: 'cx-kosmos', type: 'studio', area: 24, rooms: 1, published: true, description: 'Светлая студия с эркером и зонированием.' },
-  { id: 'apt-ks-02', complexId: 'cx-kosmos', type: 'one', area: 34, rooms: 2, published: true, description: 'Однокомнатная квартира с кухней-гостиной.' },
-  { id: 'apt-ks-03', complexId: 'cx-kosmos', type: 'two', area: 52, rooms: 3, published: true, description: 'Двухкомнатная квартира с двумя спальнями.' },
-  { id: 'apt-sz-01', complexId: 'cx-sezony', type: 'one', area: 35, rooms: 2, published: true, description: 'Однокомнатная квартира с видом на парк.' },
-  { id: 'apt-sz-02', complexId: 'cx-sezony', type: 'euro-two', area: 41, rooms: 2, published: true, description: 'Евродвушка с панорамным остеклением.' },
-  { id: 'apt-kl-01', complexId: 'cx-kultura', type: 'two', area: 54, rooms: 3, published: true, description: 'Двухкомнатная квартира с высокими потолками.' },
-  { id: 'apt-kl-02', complexId: 'cx-kultura', type: 'three', area: 66, rooms: 4, published: true, description: 'Трёхкомнатная квартира в кирпичном доме.' },
-  { id: 'apt-gs-01', complexId: 'cx-greenside', type: 'one', area: 33, rooms: 2, published: true, description: 'Однокомнатная квартира с террасой.' },
-  { id: 'apt-gs-02', complexId: 'cx-greenside', type: 'two', area: 50, rooms: 3, published: true, description: 'Двухкомнатная квартира с двумя санузлами.' },
-  { id: 'apt-ml-01', complexId: 'cx-malina', type: 'studio', area: 26, rooms: 1, published: true, description: 'Студия с большой кухней-гостиной.' },
-  { id: 'apt-ml-02', complexId: 'cx-malina', type: 'one', area: 37, rooms: 2, published: true, description: 'Однокомнатная квартира с гардеробной.' },
-  { id: 'apt-rn-01', complexId: 'cx-rechnoy', type: 'one', area: 35, rooms: 2, published: true, description: 'Демонстрационная планировка однокомнатной квартиры.' },
-  { id: 'apt-rn-02', complexId: 'cx-rechnoy', type: 'two', area: 53, rooms: 3, published: true, description: 'Демонстрационная планировка двухкомнатной квартиры.' },
-];
+/* Подтверждённых планировок пока нет: расчёт идёт по площади, которую вводит пользователь. */
+const DEFAULT_APARTMENTS = [];
 
 /* ---------- Дизайн-проекты ---------- */
 
@@ -312,20 +411,20 @@ const DEFAULT_DESIGNS = [
     published: true,
   },
   {
-    id: 'ds-scandinavian',
-    slug: 'scandinavian',
-    name: 'Scandinavian',
-    style: 'Скандинавский',
+    id: 'ds-eco-light',
+    slug: 'eco-light',
+    name: 'Eco Light',
+    style: 'Эко',
     packageLevel: 'base',
     priceLevel: 'Экономный',
     description:
-      'Светлый скандинавский интерьер: белые стены, деревянные полы, функциональная ' +
-      'мебель и много естественного света. Идеален для небольших квартир.',
-    image: IMG.interior4,
-    gallery: [IMG.interior4, IMG.interior5, IMG.bedroom1, IMG.kitchen2],
-    palette: ['#FBF9F4', '#E4E0D6', '#A8A294', '#5B5F54'],
-    materials: ['Сосна', 'Хлопок', 'Керамика', 'Сталь'],
-    suitableTypes: ['studio', 'one'],
+      'Простой светлый интерьер на доступных материалах: ламинат под дерево, покраска стен, ' +
+      'натяжной потолок и практичная мебель. Хорошо подходит для небольших квартир и первого ремонта.',
+    image: IMG.interior14,
+    gallery: [IMG.interior14, IMG.interior15, IMG.interior16, IMG.kitchen2],
+    palette: ['#F7F4EE', '#D9D2C3', '#9DA58C', '#4B5043'],
+    materials: ['Ламинат', 'Краска', 'Хлопок', 'Светлое дерево'],
+    suitableTypes: ['studio', 'one', 'euro-two'],
     published: true,
   },
   {
@@ -350,7 +449,7 @@ const DEFAULT_DESIGNS = [
     slug: 'warm-modern',
     name: 'Warm Modern',
     style: 'Тёплый модерн',
-    packageLevel: 'premium',
+    packageLevel: 'comfort-plus',
     priceLevel: 'Выше среднего',
     description:
       'Тёплый современный интерьер с выразительными фактурами: микроцемент, ' +
@@ -367,7 +466,7 @@ const DEFAULT_DESIGNS = [
     slug: 'modern-classic',
     name: 'Modern Classic',
     style: 'Современная классика',
-    packageLevel: 'premium',
+    packageLevel: 'comfort-plus',
     priceLevel: 'Выше среднего',
     description:
       'Сдержанная классика в современном прочтении: симметрия, молдинги, ' +
@@ -424,9 +523,9 @@ const DEFAULT_PACKAGES = [
     published: true,
   },
   {
-    id: 'pkg-premium',
-    slug: 'premium',
-    name: 'Премиум',
+    id: 'pkg-comfort-plus',
+    slug: 'comfort-plus',
+    name: 'Комфорт +',
     worksRate: 22000,
     roughRate: 9000,
     description:
@@ -439,27 +538,27 @@ const DEFAULT_PACKAGES = [
 /* ---------- Материалы (чистовая отделка) ---------- */
 
 const DEFAULT_MATERIALS = [
-  { id: 'mat-floor-laminate', slug: 'laminate', name: 'Ламинат 33 класс', category: 'floor', unit: 'м²', price: 1800, includedIn: ['base', 'comfort', 'premium'], description: 'Практичное напольное покрытие с фактурой дерева.' },
-  { id: 'mat-floor-parquet', slug: 'parquet', name: 'Паркетная доска', category: 'floor', unit: 'м²', price: 4200, includedIn: ['comfort', 'premium'], description: 'Натуральное дерево, тёплая поверхность.' },
-  { id: 'mat-floor-keramogranit', slug: 'keramogranit', name: 'Керамогранит', category: 'floor', unit: 'м²', price: 2600, includedIn: ['comfort', 'premium'], description: 'Износостойкий материал для прихожей и кухни.' },
-  { id: 'mat-floor-engineered', slug: 'engineered', name: 'Инженерная доска', category: 'floor', unit: 'м²', price: 5600, includedIn: ['premium'], description: 'Премиальное покрытие из массива ценных пород.' },
-  { id: 'mat-walls-paint', slug: 'paint', name: 'Краска', category: 'walls', unit: 'м²', price: 700, includedIn: ['base', 'comfort', 'premium'], description: 'Матовая интерьерная краска, широкая палитра.' },
-  { id: 'mat-walls-wallpaper', slug: 'wallpaper', name: 'Обои', category: 'walls', unit: 'м²', price: 1100, includedIn: ['comfort', 'premium'], description: 'Флизелиновые обои с фактурой.' },
-  { id: 'mat-walls-plaster', slug: 'plaster', name: 'Декоративная штукатурка', category: 'walls', unit: 'м²', price: 2400, includedIn: ['premium'], description: 'Фактурное покрытие с эффектом камня.' },
-  { id: 'mat-walls-microcement', slug: 'microcement', name: 'Микроцемент', category: 'walls', unit: 'м²', price: 3400, includedIn: ['premium'], description: 'Бесшовное покрытие в современном стиле.' },
-  { id: 'mat-ceiling-matte', slug: 'ceiling-matte', name: 'Натяжной матовый', category: 'ceiling', unit: 'м²', price: 1100, includedIn: ['base', 'comfort', 'premium'], description: 'Ровный матовый потолок.' },
-  { id: 'mat-ceiling-satin', slug: 'ceiling-satin', name: 'Натяжной сатиновый', category: 'ceiling', unit: 'м²', price: 1400, includedIn: ['comfort', 'premium'], description: 'Потолок с мягким перламутровым блеском.' },
-  { id: 'mat-ceiling-gk', slug: 'ceiling-gk', name: 'Гипсокартон с покраской', category: 'ceiling', unit: 'м²', price: 1700, includedIn: ['premium'], description: 'Многоуровневые конструкции со скрытой подсветкой.' },
-  { id: 'mat-tile-ceramic', slug: 'tile-ceramic', name: 'Керамическая плитка', category: 'tile', unit: 'м²', price: 1900, includedIn: ['base', 'comfort', 'premium'], description: 'Классическая плитка для ванной и кухни.' },
-  { id: 'mat-tile-large', slug: 'tile-large', name: 'Керамогранит крупноформатный', category: 'tile', unit: 'м²', price: 2900, includedIn: ['comfort', 'premium'], description: 'Крупный формат, минимум швов.' },
-  { id: 'mat-tile-mosaic', slug: 'tile-mosaic', name: 'Мозаика', category: 'tile', unit: 'м²', price: 3900, includedIn: ['premium'], description: 'Акцентные поверхности из мозаики.' },
-  { id: 'mat-doors-standard', slug: 'doors-standard', name: 'Межкомнатные двери', category: 'doors', unit: 'шт', price: 14000, includedIn: ['base', 'comfort', 'premium'], description: 'Двери с эмалью и скрытыми петлями.' },
-  { id: 'mat-doors-hidden', slug: 'doors-hidden', name: 'Двери скрытого монтажа', category: 'doors', unit: 'шт', price: 28000, includedIn: ['premium'], description: 'Двери «в стену» с потайным коробом.' },
-  { id: 'mat-light-basic', slug: 'light-basic', name: 'Базовый свет', category: 'lighting', unit: 'комплект', price: 18000, includedIn: ['base', 'comfort', 'premium'], description: 'Встроенные светильники и выключатели.' },
-  { id: 'mat-light-track', slug: 'light-track', name: 'Трековые светильники', category: 'lighting', unit: 'комплект', price: 32000, includedIn: ['comfort', 'premium'], description: 'Акцентное освещение на шинопроводе.' },
-  { id: 'mat-light-designer', slug: 'light-designer', name: 'Дизайнерский свет', category: 'lighting', unit: 'комплект', price: 55000, includedIn: ['premium'], description: 'Авторские светильники и сценарии света.' },
-  { id: 'mat-plumb-basic', slug: 'plumb-basic', name: 'Сантехника базовая', category: 'plumbing', unit: 'комплект', price: 45000, includedIn: ['base', 'comfort', 'premium'], description: 'Смесители, унитаз, душевая система.' },
-  { id: 'mat-plumb-premium', slug: 'plumb-premium', name: 'Сантехника премиум', category: 'plumbing', unit: 'комплект', price: 95000, includedIn: ['premium'], description: 'Дизайнерская сантехника и скрытые инсталляции.' },
+  { id: 'mat-floor-laminate', slug: 'laminate', name: 'Ламинат 33 класс', category: 'floor', unit: 'м²', price: 1800, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Практичное напольное покрытие с фактурой дерева.' },
+  { id: 'mat-floor-parquet', slug: 'parquet', name: 'Паркетная доска', category: 'floor', unit: 'м²', price: 4200, includedIn: ['comfort', 'comfort-plus'], description: 'Натуральное дерево, тёплая поверхность.' },
+  { id: 'mat-floor-keramogranit', slug: 'keramogranit', name: 'Керамогранит', category: 'floor', unit: 'м²', price: 2600, includedIn: ['comfort', 'comfort-plus'], description: 'Износостойкий материал для прихожей и кухни.' },
+  { id: 'mat-floor-engineered', slug: 'engineered', name: 'Инженерная доска', category: 'floor', unit: 'м²', price: 5600, includedIn: ['comfort-plus'], description: 'Премиальное покрытие из массива ценных пород.' },
+  { id: 'mat-walls-paint', slug: 'paint', name: 'Краска', category: 'walls', unit: 'м²', price: 700, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Матовая интерьерная краска, широкая палитра.' },
+  { id: 'mat-walls-wallpaper', slug: 'wallpaper', name: 'Обои', category: 'walls', unit: 'м²', price: 1100, includedIn: ['comfort', 'comfort-plus'], description: 'Флизелиновые обои с фактурой.' },
+  { id: 'mat-walls-plaster', slug: 'plaster', name: 'Декоративная штукатурка', category: 'walls', unit: 'м²', price: 2400, includedIn: ['comfort-plus'], description: 'Фактурное покрытие с эффектом камня.' },
+  { id: 'mat-walls-microcement', slug: 'microcement', name: 'Микроцемент', category: 'walls', unit: 'м²', price: 3400, includedIn: ['comfort-plus'], description: 'Бесшовное покрытие в современном стиле.' },
+  { id: 'mat-ceiling-matte', slug: 'ceiling-matte', name: 'Натяжной матовый', category: 'ceiling', unit: 'м²', price: 1100, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Ровный матовый потолок.' },
+  { id: 'mat-ceiling-satin', slug: 'ceiling-satin', name: 'Натяжной сатиновый', category: 'ceiling', unit: 'м²', price: 1400, includedIn: ['comfort', 'comfort-plus'], description: 'Потолок с мягким перламутровым блеском.' },
+  { id: 'mat-ceiling-gk', slug: 'ceiling-gk', name: 'Гипсокартон с покраской', category: 'ceiling', unit: 'м²', price: 1700, includedIn: ['comfort-plus'], description: 'Многоуровневые конструкции со скрытой подсветкой.' },
+  { id: 'mat-tile-ceramic', slug: 'tile-ceramic', name: 'Керамическая плитка', category: 'tile', unit: 'м²', price: 1900, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Классическая плитка для ванной и кухни.' },
+  { id: 'mat-tile-large', slug: 'tile-large', name: 'Керамогранит крупноформатный', category: 'tile', unit: 'м²', price: 2900, includedIn: ['comfort', 'comfort-plus'], description: 'Крупный формат, минимум швов.' },
+  { id: 'mat-tile-mosaic', slug: 'tile-mosaic', name: 'Мозаика', category: 'tile', unit: 'м²', price: 3900, includedIn: ['comfort-plus'], description: 'Акцентные поверхности из мозаики.' },
+  { id: 'mat-doors-standard', slug: 'doors-standard', name: 'Межкомнатные двери', category: 'doors', unit: 'шт', price: 14000, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Двери с эмалью и скрытыми петлями.' },
+  { id: 'mat-doors-hidden', slug: 'doors-hidden', name: 'Двери скрытого монтажа', category: 'doors', unit: 'шт', price: 28000, includedIn: ['comfort-plus'], description: 'Двери «в стену» с потайным коробом.' },
+  { id: 'mat-light-basic', slug: 'light-basic', name: 'Базовый свет', category: 'lighting', unit: 'комплект', price: 18000, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Встроенные светильники и выключатели.' },
+  { id: 'mat-light-track', slug: 'light-track', name: 'Трековые светильники', category: 'lighting', unit: 'комплект', price: 32000, includedIn: ['comfort', 'comfort-plus'], description: 'Акцентное освещение на шинопроводе.' },
+  { id: 'mat-light-designer', slug: 'light-designer', name: 'Дизайнерский свет', category: 'lighting', unit: 'комплект', price: 55000, includedIn: ['comfort-plus'], description: 'Авторские светильники и сценарии света.' },
+  { id: 'mat-plumb-basic', slug: 'plumb-basic', name: 'Сантехника базовая', category: 'plumbing', unit: 'комплект', price: 45000, includedIn: ['base', 'comfort', 'comfort-plus'], description: 'Смесители, унитаз, душевая система.' },
+  { id: 'mat-plumb-premium', slug: 'plumb-premium', name: 'Сантехника премиум', category: 'plumbing', unit: 'комплект', price: 95000, includedIn: ['comfort-plus'], description: 'Дизайнерская сантехника и скрытые инсталляции.' },
 ];
 
 /* ---------- Кухни ---------- */
@@ -524,7 +623,7 @@ const PLAN_LAYOUTS = {
 const DURATION_MODEL = {
   baseDays: 30,
   daysPerM2: 0.9,
-  packageExtra: { base: 0, comfort: 8, premium: 14 },
+  packageExtra: { base: 0, comfort: 8, 'comfort-plus': 14 },
   spread: 0.15,
 };
 
@@ -538,135 +637,7 @@ const OTHER_EXPENSES = {
 };
 
 
-/* ---------- Проверенные источники и публикация ---------- */
-/* Факты о ЖК берём только с сайтов застройщиков. Фотографии сторонних
-   интерьерных референсов не должны выдаваться за фотографии самого ЖК. */
-const KVADRAT_SOURCE_AUDIT_DATE = '2026-10-15';
-const KVADRAT_OFFICIAL_SOURCES = {
-  ssk: 'https://sskuban.ru/rostov-na-donu/',
-  oktyabrPark: 'https://oktyabrskiipark.ru/',
-  sk10Projects: 'https://sk10.ru/projects',
-  kosmos: 'https://sk10.ru/projects/zhk-kosmos',
-  sezony: 'https://sk10.ru/projects/zhk-sezony',
-  kultura: 'https://sk10.ru/projects/zhk-kultura',
-  greenside: 'https://sk10.ru/projects/zhk-grinsajd',
-  malina: 'https://sk10.ru/projects/zhk-malina-park',
-  donneftestroy: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects',
-  panorama: 'https://xn--d1acaqraferjjcw.xn--p1ai/projects/panorama-na-teatralnom',
-};
-
-const KVADRAT_OFFICIAL_PHOTOS = {
-  oktyabrPark: 'https://img1.creatium.ru/disk2/2a/3b/da/03faf78067ece3d201384444331345e52f/01jn0qz7z45vma0s99zhbw0gzc.jpg',
-  kosmos: 'https://sk10.ru/m/p/kosmos/curated/8e0f1df5fae70533baf310c644a9af82.webp',
-  kultura: 'https://sk10.ru/m/p/pg/gl/e351119ea4d48905b6421319ce690e8f063f056d.webp',
-  greenside: 'https://sk10.ru/m/p/pg/gl/45b8753cfae48e3b44a104a01101b17991a1afa0.webp',
-  panorama: 'https://img.xn--d1acaqraferjjcw.xn--p1ai/rs%3Afill%3A1920%3A980%3A0/plain/production/adca2fee3f3d9eb0c203a988173b5c8c46371.jpg',
-  sezony: 'https://sk10.ru/m/p/pg/gl/90565805b73415f2dd0e52accfbb1845eb957e39.webp',
-  malina: 'https://sk10.ru/m/p/pg/gl/f2fd5940e5e42120263178327b93daf0cb53b2f3.webp',
-};
-
-function kvadratSetVerifiedComplex(id, facts) {
-  const item = DEFAULT_COMPLEXES.find((c) => c.id === id);
-  if (item) Object.assign(item, facts);
-}
-
-kvadratSetVerifiedComplex('cx-op', {
-  name: 'Октябрь Парк',
-  class: 'комфорт+',
-  address: 'Ростов-на-Дону, ул. Таганрогская, 132/4',
-  year: '',
-  floors: '',
-  description: 'Жилой комплекс ССК в Октябрьском районе Ростова-на-Дону. Актуальные корпуса, планировки, цены и сроки следует уточнять на официальном сайте застройщика.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.oktyabrPark,
-  sourceName: 'Официальный сайт ЖК «Октябрь Парк»',
-  image: KVADRAT_OFFICIAL_PHOTOS.oktyabrPark,
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.oktyabrPark],
-  imageKind: 'official',
-  demo: false,
-  published: true,
-});
-kvadratSetVerifiedComplex('cx-kosmos', {
-  address: 'Ростов-на-Дону, ул. Красноармейская, 250',
-  class: 'бизнес-класс',
-  year: '',
-  floors: 'до 24 этажей',
-  description: 'ЖК «Космос» от СК10. По официальной странице проекта дом сдан; наличие квартир, цены и характеристики конкретных лотов проверяйте у застройщика.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.kosmos,
-  sourceName: 'Официальный сайт СК10',
-  image: KVADRAT_OFFICIAL_PHOTOS.kosmos,
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.kosmos],
-  imageKind: 'official',
-  demo: false,
-});
-kvadratSetVerifiedComplex('cx-kultura', {
-  address: 'Ростов-на-Дону, ул. Текучёва, 205',
-  class: '',
-  year: '',
-  floors: '19–25 этажей',
-  description: 'ЖК «Культура» от СК10. Данные о сроках, доступных квартирах и ценах могут меняться — сверяйте их на официальной странице проекта.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.kultura,
-  sourceName: 'Официальный сайт СК10',
-  image: KVADRAT_OFFICIAL_PHOTOS.kultura,
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.kultura],
-  imageKind: 'official',
-  demo: false,
-});
-kvadratSetVerifiedComplex('cx-greenside', {
-  address: 'Ростов-на-Дону, ул. Нансена, 109',
-  class: '',
-  year: '',
-  floors: 'до 25 этажей',
-  description: 'ЖК «Гринсайд» от СК10. Информация о корпусах, сроках и наличии квартир различается по очередям; актуальные сведения — на сайте застройщика.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.greenside,
-  sourceName: 'Официальный сайт СК10',
-  image: KVADRAT_OFFICIAL_PHOTOS.greenside,
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.greenside],
-  imageKind: 'official',
-  demo: false,
-});
-kvadratSetVerifiedComplex('cx-sezony', {
-  address: 'Ростов-на-Дону, бульвар Платова, 14',
-  class: '',
-  year: '',
-  floors: '9 этажей',
-  description: 'ЖК «Сезоны» от СК10. Актуальные сроки, корпуса и доступность квартир необходимо сверять с официальной страницей застройщика.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.sezony,
-  sourceName: 'Официальный сайт СК10',
-  image: KVADRAT_OFFICIAL_PHOTOS.sezony,
-  imageKind: 'official',
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.sezony],
-  demo: false,
-});
-kvadratSetVerifiedComplex('cx-malina', {
-  address: 'Ростов-на-Дону, район пересечения улиц Малиновского, Доватора и Еременко',
-  class: '',
-  year: '',
-  floors: 'до 25 этажей',
-  description: 'ЖК «Малина Парк» от СК10. Подробные характеристики, корпуса и доступные квартиры смотрите в официальном каталоге застройщика.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.malina,
-  sourceName: 'Официальный сайт СК10',
-  image: KVADRAT_OFFICIAL_PHOTOS.malina,
-  imageKind: 'official',
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.malina],
-  demo: false,
-});
-
-/* Вместо вымышленного «Речного» показываем реальный проект ДОННЕФТЕСТРОЯ. */
-kvadratSetVerifiedComplex('cx-rechnoy', {
-  slug: 'panorama-na-teatralnom',
-  name: 'Панорама на Театральном',
-  class: 'бизнес-класс',
-  address: 'Ростов-на-Дону, Театральный проспект, 62',
-  year: '',
-  floors: '25',
-  description: 'Жилой комплекс бизнес-класса от ДОННЕФТЕСТРОЯ. На официальной странице опубликованы варианты планировок; стоимость и наличие конкретной квартиры необходимо уточнять у застройщика.',
-  sourceUrl: KVADRAT_OFFICIAL_SOURCES.panorama,
-  sourceName: 'Официальный сайт ДОННЕФТЕСТРОЯ',
-  image: KVADRAT_OFFICIAL_PHOTOS.panorama,
-  gallery: [KVADRAT_OFFICIAL_PHOTOS.panorama],
-  imageKind: 'official',
-  demo: false,
-});
+/* ---------- Застройщики: официальные сайты ---------- */
 const _dnsDeveloper = DEFAULT_DEVELOPERS.find((d) => d.id === 'dev-dns');
 if (_dnsDeveloper) {
   _dnsDeveloper.description = 'ДОННЕФТЕСТРОЙ — застройщик жилых комплексов в Ростове-на-Дону и Аксае.';
@@ -674,25 +645,16 @@ if (_dnsDeveloper) {
 }
 const _sskDeveloper = DEFAULT_DEVELOPERS.find((d) => d.id === 'dev-ssk');
 if (_sskDeveloper) {
-  _sskDeveloper.description = 'Официальный каталог ССК в Ростове-на-Дону. Характеристики и наличие квартир сверяйте у застройщика.';
+  _sskDeveloper.description = 'ССК — застройщик в Ростове-на-Дону, ЖК «Октябрь Парк».';
   _sskDeveloper.sourceUrl = KVADRAT_OFFICIAL_SOURCES.ssk;
 }
 const _sk10Developer = DEFAULT_DEVELOPERS.find((d) => d.id === 'dev-sk10');
 if (_sk10Developer) {
-  _sk10Developer.description = 'Официальный каталог проектов СК10 в Ростове-на-Дону.';
+  _sk10Developer.description = 'СК10 — застройщик жилых комплексов в Ростове-на-Дону.';
   _sk10Developer.sourceUrl = KVADRAT_OFFICIAL_SOURCES.sk10Projects;
 }
 
-/* Все макеты квартир в исходном архиве были нарисованными SVG-заглушками,
-   а не планировками застройщиков. Сохраняем их в админке как черновики,
-   но не публикуем посетителям до замены на подтверждённые планы. */
-DEFAULT_APARTMENTS.forEach((apartment) => {
-  apartment.published = false;
-  apartment.dataStatus = 'draft-unverified';
-  apartment.sourceUrl = null;
-});
-
-/* Отмечаем интерьерные картинки как референсы, а не реальные интерьеры объектов. */
+/* Интерьерные картинки — референсы стиля, а не реальные интерьеры объектов. */
 DEFAULT_DESIGNS.forEach((design) => {
   design.imageKind = 'interior-reference';
   design.disclaimer = 'Иллюстрация стиля; не является обещанием конкретной комплектации или фотографией квартиры в ЖК.';

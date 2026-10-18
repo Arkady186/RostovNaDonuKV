@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Отзывы — КВАДРАТ</title>
+  <meta name="description" content="Отзывы клиентов КВАДРАТ. Оставьте свой отзыв и оцените сервис.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-header"></div>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div id="crumbs"></div>
+        <h1 class="page-hero__title">Отзывы</h1>
+        <p class="page-hero__sub">Честные оценки наших клиентов. Все отзывы проходят модерацию, критические мы не удаляем.</p>
+      </div>
+    </section>
+    <section class="section section--tight">
+      <div class="container">
+        <div id="rv-summary"></div>
+        <div class="rv-grid" id="rv-list"></div>
+        <div id="rv-form-wrap"></div>
+      </div>
+    </section>
+  </main>
+  <div id="app-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/estimate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    window.PAGE_KEY = 'reviews';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const $ = (id) => document.getElementById(id);
+      const esc = UI.escapeHtml;
+      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
+        { label: 'Главная', href: 'index.html' }, { label: 'Отзывы' },
+      ]);
+
+      const stars = (n) => `<span class="stars" role="img" aria-label="${n} из 5">${[1,2,3,4,5].map((i) => `<span class="${i <= Math.round(n) ? '' : 'off'}">★</span>`).join('')}</span>`;
+      const plural = (n) => { const a = n % 100, b = n % 10; return (a > 10 && a < 15) ? 'отзывов' : b === 1 ? 'отзыв' : (b > 1 && b < 5) ? 'отзыва' : 'отзывов'; };
+      const fmt = (t) => new Date(t).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      async function load() {
+        let data;
+        try { data = await Auth.api('GET', '/api/reviews'); }
+        catch (e) {
+          $('rv-summary').innerHTML = UI.emptyState('Отзывы временно недоступны', e.message);
+          return;
+        }
+        const s = data.stats;
+        const max = Math.max(1, ...s.dist);
+        $('rv-summary').innerHTML = s.count ? `
+          <div class="rv-summary">
+            <div class="rv-score">
+              <div class="rv-score__num">${String(s.avg).replace('.', ',')}</div>
+              ${stars(s.avg)}
+              <div class="rv-score__count">${s.count} ${plural(s.count)}</div>
+            </div>
+            <div class="rv-bars">${[5,4,3,2,1].map((n) => `
+              <div class="rv-bar"><span>${n} ★</span><div class="rv-bar__track"><div class="rv-bar__fill" style="width:${s.dist[n-1] / max * 100}%"></div></div><span>${s.dist[n-1]}</span></div>`).join('')}
+            </div>
+          </div>` : `
+          <div class="rv-summary" style="grid-template-columns:1fr">
+            <div><strong>Пока нет настоящих отзывов.</strong>
+            <p style="margin:6px 0 0;color:var(--text-2)">Ниже — примеры оформления. Станьте первым, кто оценит нас: рейтинг считается только по отзывам реальных клиентов.</p></div>
+          </div>`;
+
+        $('rv-list').innerHTML = data.reviews.map((r) => `
+          <article class="rv-card">
+            <div class="rv-card__head">
+              <span class="rv-card__ava" aria-hidden="true">${esc((r.name || '?').charAt(0).toUpperCase())}</span>
+              <div><div class="rv-card__name">${esc(r.name)}</div><div class="rv-card__date">${fmt(r.createdAt)}</div></div>
+            </div>
+            ${stars(r.rating)}
+            <p class="rv-card__text">${esc(r.text)}</p>
+            ${r.sample ? '<span class="rv-sample">Пример отзыва</span>' : ''}
+          </article>`).join('');
+      }
+
+      function renderForm() {
+        const wrap = $('rv-form-wrap');
+        if (!Auth.isLoggedIn()) {
+          wrap.innerHTML = `
+            <div class="rv-form" id="rv-form">
+              <h2>Оставьте свой отзыв</h2>
+              <p style="color:var(--text-2);line-height:1.6">Чтобы отзыв был настоящим, оставлять их могут только зарегистрированные пользователи.</p>
+              <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+                <a class="btn btn--primary" href="login.html?next=reviews.html">Войти</a>
+                <a class="btn btn--secondary" href="login.html?next=reviews.html#register">Регистрация</a>
+              </div>
+            </div>`;
+          return;
+        }
+        wrap.innerHTML = `
+          <form class="rv-form" id="rv-form" novalidate>
+            <h2>Оставьте свой отзыв</h2>
+            <p style="color:var(--text-2);margin:0">Расскажите, как всё прошло — это помогает нам и другим клиентам.</p>
+            <div class="auth-msg auth-msg--error" id="rv-err" hidden role="alert" style="margin-top:var(--space-4)"></div>
+            <fieldset style="border:0;padding:0;margin:0">
+              <legend class="field__label" style="margin-top:var(--space-4)">Ваша оценка</legend>
+              <div class="star-input">
+                ${[5,4,3,2,1].map((n) => `<input type="radio" name="rating" id="st${n}" value="${n}"><label for="st${n}" title="${n} из 5">★</label>`).join('')}
+              </div>
+            </fieldset>
+            <div class="field" style="margin-bottom:var(--space-5)">
+              <label class="field__label" for="rv-text">Ваш отзыв</label>
+              <textarea class="textarea" id="rv-text" rows="5" maxlength="1500" placeholder="Что понравилось, что можно улучшить?"></textarea>
+            </div>
+            <button class="btn btn--primary btn--lg" type="submit">Отправить отзыв</button>
+          </form>`;
+        const form = $('rv-form');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const err = $('rv-err'); err.hidden = true;
+          const rating = Number((form.querySelector('input[name=rating]:checked') || {}).value || 0);
+          const text = $('rv-text').value.trim();
+          if (!rating) { err.textContent = 'Поставьте оценку — нажмите на звёзды'; err.hidden = false; return; }
+          if (text.length < 10) { err.textContent = 'Напишите отзыв чуть подробнее (минимум 10 символов)'; err.hidden = false; return; }
+          const btn = form.querySelector('button[type=submit]'); btn.disabled = true;
+          try {
+            await Auth.api('POST', '/api/reviews', { rating, text });
+            const name = ((Auth.current() || {}).name || '').split(' ')[0];
+            wrap.innerHTML = `
+              <div class="rv-form"><div class="rv-thanks">
+                <div class="rv-thanks__icon" aria-hidden="true">✓</div>
+                <h2>Спасибо за отзыв${name ? ', ' + esc(name) : ''}!</h2>
+                <p style="color:var(--text-2);line-height:1.6;max-width:480px;margin:0 auto var(--space-5)">Нам очень важно ваше мнение — оно помогает становиться лучше. Отзыв появится на странице после короткой модерации.</p>
+                <a class="btn btn--secondary" href="index.html">На главную</a>
+              </div></div>`;
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } catch (er) {
+            err.textContent = er.message; err.hidden = false; btn.disabled = false;
+          }
+        });
+      }
+
+      load();
+      renderForm();
+      document.addEventListener('auth:ready', renderForm);
+    });
+  </script>
+</body>
+</html>

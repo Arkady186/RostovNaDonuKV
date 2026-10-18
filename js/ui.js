@@ -15,11 +15,36 @@ const UI = (() => {
 
   function escapeHtml(str) {
     return String(str == null ? '' : str)
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '>')
-      .replace(/"/g, '"')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  /* Плитка выбора ЖК: вся карточка кликабельна */
+  function complexTile(c, dev, opts) {
+    const featured = !!(opts && opts.featured);
+    const fav = Store.isFavorite('complexes', c.id);
+    const meta = [dev ? dev.name : '', c.class ? c.class : ''].filter(Boolean).join(' · ');
+    const href = 'complex.html?slug=' + encodeURIComponent(c.slug);
+    return `
+      <article class="cx-tile ${featured ? 'cx-tile--featured' : ''}">
+        <a class="cx-tile__link" href="${href}" aria-label="Выбрать ЖК «${escapeHtml(c.name)}»">
+          <span class="cx-tile__media">
+            <img src="${escapeHtml(c.image)}" alt="ЖК «${escapeHtml(c.name)}»" loading="lazy">
+            <span class="cx-tile__credit">${c.imageKind === 'official' ? 'Фото: сайт застройщика' : 'Иллюстрация'}</span>
+            ${c.priority ? '<span class="cx-tile__badge">Популярный выбор</span>' : ''}
+          </span>
+          <span class="cx-tile__body">
+            <span class="cx-tile__meta">${escapeHtml(meta)}</span>
+            <span class="cx-tile__name">${escapeHtml(c.name)}</span>
+            <span class="cx-tile__addr">${escapeHtml(c.address || '')}</span>
+            <span class="cx-tile__go">Выбрать ЖК <span aria-hidden="true">→</span></span>
+          </span>
+        </a>
+        <button class="card__fav cx-tile__fav ${fav ? 'is-active' : ''}" data-fav="complexes" data-id="${escapeHtml(c.id)}" aria-label="В избранное">♡</button>
+      </article>`;
   }
 
   function formatNumber(n) {
@@ -58,6 +83,7 @@ const UI = (() => {
     { key: 'catalog', href: 'complexes.html', label: 'Каталог' },
     { key: 'designs', href: 'designs.html', label: 'Дизайн-проекты' },
     { key: 'how-it-works', href: 'how-it-works.html', label: 'Как это работает' },
+    { key: 'reviews', href: 'reviews.html', label: 'Отзывы' },
   ];
 
   const ACTIVE_GROUPS = {
@@ -79,6 +105,10 @@ const UI = (() => {
     contacts: '',
     contract: '',
     admin: '',
+    reviews: 'reviews',
+    login: '',
+    privacy: '',
+    terms: '',
   };
 
   function renderHeader(activeKey) {
@@ -113,6 +143,7 @@ const UI = (() => {
               Избранное <span class="fav-count" id="fav-count">0</span>
             </a>
             <a class="btn btn--primary btn--sm" href="configurator.html">Подобрать ремонт</a>
+            <div class="header__auth" id="auth-slot"></div>
           </nav>
           <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="header-nav">
             <span></span><span></span><span></span>
@@ -147,6 +178,7 @@ const UI = (() => {
     }
 
     updateFavoritesBadge();
+    if (typeof Auth !== 'undefined') Auth.renderSlot();
   }
 
   function updateFavoritesBadge() {
@@ -185,6 +217,7 @@ const UI = (() => {
                 <a href="how-it-works.html">Как это работает</a>
                 <a href="favorites.html">Избранное</a>
                 <a href="estimate.html">Моя смета</a>
+                <a href="reviews.html">Отзывы</a>
                 <a href="about.html">О проекте</a>
                 <a href="contacts.html">Контакты</a>
               </div>
@@ -201,7 +234,10 @@ const UI = (() => {
           </div>
           <div class="footer__bottom">
             <span>© ${new Date().getFullYear()} КВАДРАТ. Демонстрационный продукт.</span>
-            <span>Данные о ЖК, ценах и сроках носят информационный характер.</span>
+            <span class="footer__legal">
+              <a href="privacy.html">Политика обработки персональных данных</a>
+              <a href="terms.html">Пользовательское соглашение</a>
+            </span>
           </div>
         </div>
       </footer>`;
@@ -353,6 +389,7 @@ const UI = (() => {
     qs,
     qsa,
     escapeHtml,
+    complexTile,
     formatNumber,
     formatMoney,
     getParam,

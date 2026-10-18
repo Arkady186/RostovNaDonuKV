@@ -1,0 +1,25 @@
+# Автодеплой из GitHub на Render (render.com): New → Blueprint → выберите репозиторий.
+# Диск нужен, чтобы база клиентов не пропадала при обновлении сайта (платный тариф).
+services:
+  - type: web
+    name: kvadrat
+    runtime: node
+    plan: starter
+    buildCommand: echo "no build"
+    startCommand: node server.js
+    healthCheckPath: /api/me
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data
+      - key: ADMIN_PHONE
+        value: "+79000000000"
+      - key: ADMIN_PASSWORD
+        sync: false   # введите свой пароль в панели Render, в GitHub его нет
+    disk:
+      name: kvadrat-data
+      mountPath: /var/data
+      sizeGB: 1

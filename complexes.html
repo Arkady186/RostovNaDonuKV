@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Жилые комплексы — КВАДРАТ</title>
-  <meta name="description" content="Каталог жилых комплексов Ростова-на-Дону с фильтрами по застройщику и городу.">
+  <meta name="description" content="Выберите жилой комплекс Ростова-на-Дону: ССК, СК10, ДОННЕФТЕСТРОЙ. Реальные ЖК и фото с сайтов застройщиков.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -19,33 +19,16 @@
     <section class="page-hero">
       <div class="container">
         <div id="crumbs"></div>
-        <h1 class="page-hero__title">Жилые комплексы</h1>
+        <h1 class="page-hero__title">Выберите жилой комплекс</h1>
         <p class="page-hero__sub">
-          Поиск, фильтры по застройщику и городу. Карточки ведут к планировкам
-          и предварительному расчёту ремонта.
+          Реальные новостройки Ростова-на-Дону. Нажмите на ЖК, чтобы перейти к нему
+          и рассчитать мебель и ремонт для вашей квартиры.
         </p>
       </div>
     </section>
 
     <section class="section section--tight">
-      <div class="container">
-        <div class="filter-bar">
-          <div class="filter-bar__group">
-            <label class="filter-bar__label" for="cx-search">Поиск</label>
-            <input class="input" id="cx-search" type="search" placeholder="Название ЖК…">
-          </div>
-          <div class="filter-bar__group">
-            <label class="filter-bar__label" for="cx-developer">Застройщик</label>
-            <select class="select" id="cx-developer"></select>
-          </div>
-          <div class="filter-bar__group">
-            <label class="filter-bar__label" for="cx-city">Город</label>
-            <select class="select" id="cx-city"></select>
-          </div>
-        </div>
-        <div class="grid grid--auto" id="complexes-grid"></div>
-        <div id="complexes-empty" hidden></div>
-      </div>
+      <div class="container" id="cx-picker"></div>
     </section>
   </main>
 
@@ -55,6 +38,7 @@
   <script src="js/store.js"></script>
   <script src="js/estimate.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
     window.PAGE_KEY = 'complexes';
@@ -62,101 +46,55 @@
     document.addEventListener('DOMContentLoaded', () => {
       const catalog = Store.getCatalog();
       const cityId = Store.getCityId();
-      const urlDev = UI.getParam('developer');
 
       document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
         { label: 'Главная', href: 'index.html' },
         { label: 'Жилые комплексы' },
       ]);
 
-      const searchEl = document.getElementById('cx-search');
-      const devEl = document.getElementById('cx-developer');
-      const cityEl = document.getElementById('cx-city');
-      const grid = document.getElementById('complexes-grid');
-      const emptyEl = document.getElementById('complexes-empty');
+      const all = catalog.complexes.filter((c) => c.published && c.cityId === cityId);
+      const featured = all.filter((c) => c.priority);
+      const rest = all.filter((c) => !c.priority);
+      const picker = document.getElementById('cx-picker');
+      const devOf = (c) => catalog.developers.find((d) => d.id === c.developerId);
 
-      /* Фильтры */
-      cityEl.innerHTML = catalog.cities
-        .map((c) => `<option value="${c.id}">${UI.escapeHtml(c.name)}</option>`)
-        .join('');
-      cityEl.value = cityId;
-
-      function fillDevelopers() {
-        const devs = catalog.developers.filter((d) => d.published && d.cityId === cityEl.value);
-        devEl.innerHTML =
-          '<option value="">Все застройщики</option>' +
-          devs.map((d) => `<option value="${d.id}">${UI.escapeHtml(d.name)}</option>`).join('');
-        if (urlDev) {
-          const match = catalog.developers.find((d) => d.slug === urlDev);
-          if (match) devEl.value = match.id;
-        }
+      let html = '';
+      if (featured.length) {
+        html += '<div class="cx-group">' + featured.map((c) => UI.complexTile(c, devOf(c), { featured: true })).join('') + '</div>';
       }
 
-      function render() {
-        const q = searchEl.value.trim().toLowerCase();
-        const list = catalog.complexes.filter((c) => {
-          if (!c.published) return false;
-          if (c.cityId !== cityEl.value) return false;
-          if (devEl.value && c.developerId !== devEl.value) return false;
-          if (q && !c.name.toLowerCase().includes(q)) return false;
-          return true;
+      /* Остальные ЖК — группами по застройщикам */
+      catalog.developers
+        .filter((d) => d.published && d.cityId === cityId)
+        .forEach((dev) => {
+          const list = rest.filter((c) => c.developerId === dev.id);
+          if (!list.length) return;
+          html += `
+            <div class="cx-group">
+              <div class="cx-group__head">
+                <h2 class="cx-group__title">${UI.escapeHtml(dev.name)}</h2>
+                <span class="cx-group__count">${list.length} ЖК</span>
+              </div>
+              <div class="cx-grid">${list.map((c) => UI.complexTile(c, dev)).join('')}</div>
+            </div>`;
         });
 
-        if (!list.length) {
-          grid.innerHTML = '';
-          emptyEl.hidden = false;
-          emptyEl.innerHTML = UI.emptyState('Ничего не найдено', 'Попробуйте изменить параметры поиска или фильтры.');
-          return;
-        }
-        emptyEl.hidden = true;
-
-        grid.innerHTML = list
-          .map((c) => {
-            const dev = catalog.developers.find((d) => d.id === c.developerId);
-            const apts = catalog.apartments.filter((a) => a.complexId === c.id && a.published);
-            return `
-            <article class="card card--link">
-              <div class="card__media">
-                <img class="card__img" src="${c.image}" alt="${UI.escapeHtml(c.name)}" loading="lazy">
-                <span class="photo-credit">${c.imageKind === 'official' ? 'Материал с сайта застройщика' : 'Иллюстрация, не фото ЖК'}</span>
-                ${c.demo ? '<span class="badge badge--demo card__media-badge">Демо-данные</span>' : ''}
-                <button class="card__fav ${Store.isFavorite('complexes', c.id) ? 'is-active' : ''}" data-fav="complexes" data-id="${c.id}" aria-label="В избранное">♡</button>
-              </div>
-              <div class="card__body">
-                <h2 class="card__title"><a href="complex.html?slug=${c.slug}">${UI.escapeHtml(c.name)}</a></h2>
-                <div class="card__meta">
-                  <span class="tag">${UI.escapeHtml(dev ? dev.name : '')}</span>
-                  ${c.class ? `<span class="tag">${UI.escapeHtml(c.class)}</span>` : ''}
-                  <span class="tag">${apts.length} проверенных планировок</span>
-                </div>
-                <p class="card__text">${UI.escapeHtml(c.description.slice(0, 110))}…</p>
-                <div class="card__footer">
-                  <a class="btn btn--primary btn--sm" href="${apts.length ? `apartments.html?complex=${c.slug}` : (c.sourceUrl || `complex.html?slug=${c.slug}`)}" ${apts.length ? '' : 'target="_blank" rel="noopener noreferrer"'}>${apts.length ? 'Выбрать квартиру' : 'Проверить у застройщика ↗'}</a>
-                </div>
-              </div>
-            </article>`;
-          })
-          .join('');
+      if (!html) {
+        html = UI.emptyState('Каталог пуст', 'Для выбранного города пока нет опубликованных жилых комплексов.');
+      } else {
+        html += '<p class="source-note" style="margin-top:var(--space-9)">Фотографии и сведения взяты с официальных сайтов застройщиков и могут отличаться от актуальных. Наличие квартир, цены и сроки уточняйте у застройщика.</p>';
       }
-
-      searchEl.addEventListener('input', render);
-      devEl.addEventListener('change', render);
-      cityEl.addEventListener('change', () => {
-        fillDevelopers();
-        render();
-      });
+      picker.innerHTML = html;
 
       document.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-fav]');
         if (!btn) return;
+        e.preventDefault();
         const added = Store.toggleFavorite(btn.dataset.fav, btn.dataset.id);
         btn.classList.toggle('is-active', added);
         UI.updateFavoritesBadge();
         UI.toast(added ? 'Добавлено в избранное' : 'Удалено из избранного');
       });
-
-      fillDevelopers();
-      render();
     });
   </script>
 </body>

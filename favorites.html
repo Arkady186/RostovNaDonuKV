@@ -22,7 +22,7 @@
         <h1 class="page-hero__title">Избранное</h1>
         <p class="page-hero__sub">
           Жилые комплексы, квартиры и дизайн-проекты, которые вы сохранили.
-          Список хранится в вашем браузере и переживает обновление страницы.
+          Список привязан к вашему аккаунту и доступен с любого устройства.
         </p>
       </div>
     </section>
@@ -41,6 +41,7 @@
   <script src="js/store.js"></script>
   <script src="js/estimate.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
     window.PAGE_KEY = 'favorites';
@@ -114,7 +115,7 @@
                     <span class="tag">${UI.escapeHtml(c.class)}</span>
                   </div>
                   <div class="card__footer">
-                    <a class="btn btn--primary btn--sm" href="apartments.html?complex=${c.slug}">Выбрать квартиру</a>
+                    <a class="btn btn--primary btn--sm" href="complex.html?slug=${c.slug}">Выбрать ЖК</a>
                     <button class="btn btn--danger btn--sm" data-remove="complexes" data-id="${c.id}">Удалить</button>
                   </div>
                 </div>
@@ -191,8 +192,25 @@
         });
       }
 
-      renderTabs();
-      renderContent();
+      function gate() {
+        tabsEl.innerHTML = '';
+        contentEl.innerHTML = `
+          <div class="empty-state" style="max-width:620px;margin:0 auto">
+            <div class="empty-state__icon" aria-hidden="true">♡</div>
+            <div class="empty-state__title">Авторизуйтесь, чтобы пользоваться избранным</div>
+            <p class="empty-state__text">Войдите в аккаунт или зарегистрируйтесь — тогда понравившиеся жилые комплексы и дизайн-проекты сохранятся и будут доступны с любого устройства.</p>
+            <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+              <a class="btn btn--primary" href="login.html?next=favorites.html">Войти</a>
+              <a class="btn btn--secondary" href="login.html?next=favorites.html#register">Регистрация</a>
+            </div>
+          </div>`;
+      }
+
+      function show() {
+        if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) { renderTabs(); renderContent(); } else { gate(); }
+      }
+      show();
+      document.addEventListener('auth:ready', show);
     });
   </script>
 </body>

@@ -73,7 +73,7 @@
     <section class="section section--tight">
       <div class="container">
         <div class="cta-banner">
-          <h2 class="cta-banner__title">Посчитайте ремонт в «Октябрь Парк»</h2>
+          <h2 class="cta-banner__title" id="cta-title">Посчитайте ремонт</h2>
           <p class="cta-banner__text">
             Выберите планировку, дизайн и комплектацию — предварительная смета
             сформируется автоматически и сохранится в вашем браузере.
@@ -90,6 +90,7 @@
   <script src="js/store.js"></script>
   <script src="js/estimate.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
     window.PAGE_KEY = 'complex';
@@ -135,7 +136,7 @@
       const galleryEl = document.getElementById('complex-gallery');
       const images = complex.gallery && complex.gallery.length ? complex.gallery : [complex.image];
       galleryEl.innerHTML = `
-        <div class="gallery__main"><img id="gallery-main" src="${images[0]}" alt="${UI.escapeHtml(complex.name)}"><span class="photo-credit">${complex.imageKind === 'official' ? 'Материал с сайта застройщика' : 'Иллюстрация, не фотография ЖК'}</span></div>
+        <div class="gallery__main"><img id="gallery-main" src="${images[0]}" alt="${UI.escapeHtml(complex.name)}"><span class="photo-credit">${complex.imageKind === 'official' ? 'Фото: сайт застройщика' : 'Иллюстрация, не фотография ЖК'}</span></div>
         <div class="gallery__thumbs">
           ${images.map((src, i) => `<button class="gallery__thumb ${i === 0 ? 'is-active' : ''}" data-src="${src}" aria-label="Фото ${i + 1}"><img src="${src}" alt="" loading="lazy"></button>`).join('')}
         </div>`;
@@ -161,7 +162,7 @@
         complex.address ? { n: complex.address, l: 'адрес' } : null,
         complex.class ? { n: complex.class, l: 'класс' } : null,
         complex.floors ? { n: complex.floors, l: 'этажность' } : null,
-        { n: apartments.length, l: 'проверенных планировок в каталоге' },
+        apartments.length ? { n: apartments.length, l: 'проверенных планировок в каталоге' } : null,
       ].filter(Boolean);
       document.getElementById('complex-stats').innerHTML = verifiedFacts
         .map((s) => `<div class="estimate__meta-item"><div class="estimate__meta-label">${UI.escapeHtml(s.l)}</div><div class="estimate__meta-value">${UI.escapeHtml(String(s.n))}</div></div>`)
@@ -170,22 +171,23 @@
       const aptUrl = `apartments.html?complex=${complex.slug}`;
       const cfgUrl = `configurator.html?complex=${complex.slug}`;
       const hasVerifiedApartments = apartments.length > 0;
-      document.getElementById('complex-cta').href = hasVerifiedApartments ? aptUrl : (complex.sourceUrl || '#');
-      document.getElementById('complex-cta').textContent = hasVerifiedApartments ? 'Выбрать квартиру' : 'Квартиры у застройщика';
-      document.getElementById('complex-cta').target = hasVerifiedApartments ? '_self' : '_blank';
-      document.getElementById('complex-cta').rel = hasVerifiedApartments ? '' : 'noopener noreferrer';
-      document.getElementById('complex-config').href = hasVerifiedApartments ? cfgUrl : '#complex-apartments';
-      document.getElementById('complex-config').textContent = hasVerifiedApartments ? 'Рассчитать ремонт' : 'Сначала выбрать реальную планировку';
-      document.getElementById('complex-all-apts').href = hasVerifiedApartments ? aptUrl : (complex.sourceUrl || '#');
-      document.getElementById('complex-all-apts').textContent = hasVerifiedApartments ? 'Все планировки' : 'Планировки на сайте застройщика';
-      document.getElementById('complex-all-apts').target = hasVerifiedApartments ? '_self' : '_blank';
-      document.getElementById('complex-all-apts').rel = hasVerifiedApartments ? '' : 'noopener noreferrer';
-      document.getElementById('complex-cta2').href = hasVerifiedApartments ? cfgUrl : (complex.sourceUrl || '#');
-      document.getElementById('complex-cta2').textContent = hasVerifiedApartments ? 'Рассчитать ремонт' : 'Проверить квартиры у застройщика';
-      if (!hasVerifiedApartments) {
-        document.getElementById('complex-cta2').target = '_blank';
-        document.getElementById('complex-cta2').rel = 'noopener noreferrer';
+      const ctaMain = document.getElementById('complex-cta');
+      ctaMain.href = cfgUrl;
+      ctaMain.textContent = 'Рассчитать ремонт и мебель';
+      const ctaSecond = document.getElementById('complex-config');
+      if (complex.sourceUrl) {
+        ctaSecond.href = complex.sourceUrl;
+        ctaSecond.textContent = 'Сайт застройщика ↗';
+        ctaSecond.target = '_blank';
+        ctaSecond.rel = 'noopener noreferrer';
+      } else {
+        ctaSecond.hidden = true;
       }
+      const aptSection = document.getElementById('complex-apartments').closest('section');
+      if (!hasVerifiedApartments && aptSection) aptSection.hidden = true;
+      document.getElementById('complex-all-apts').href = aptUrl;
+      document.getElementById('complex-cta2').href = cfgUrl;
+      document.getElementById('cta-title').textContent = `Посчитайте ремонт в «${complex.name}»`;
       const sourceLink = complex.sourceUrl
         ? `<p class="source-note">Данные сверены с официальным сайтом. Доступность, цены и сроки могут меняться. <a href="${complex.sourceUrl}" target="_blank" rel="noopener noreferrer">${UI.escapeHtml(complex.sourceName || 'Перейти к первоисточнику')} ↗</a></p>`
         : '<p class="source-note">Источник данных не указан; перед публикацией требуется проверка.</p>';
@@ -218,17 +220,6 @@
           </article>`;
         })
         .join('');
-
-      if (!apartments.length) {
-        const officialCta = complex.sourceUrl
-          ? `<a class="btn btn--primary btn--sm" href="${complex.sourceUrl}" target="_blank" rel="noopener noreferrer">Открыть реальные планировки ↗</a>`
-          : '';
-        document.getElementById('complex-apartments').innerHTML = UI.emptyState(
-          'Планировки не загружены в каталог',
-          'Мы не показываем нарисованные схемы как реальные планировки. Пока можно посмотреть актуальные варианты непосредственно у застройщика.',
-          officialCta
-        );
-      }
 
       /* Дизайны */
       document.getElementById('complex-designs').innerHTML = designs

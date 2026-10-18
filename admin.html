@@ -3,722 +3,442 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Административная панель — КВАДРАТ</title>
-  <meta name="description" content="Демонстрационная административная панель сервиса КВАДРАТ.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Админ-панель — КВАДРАТ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/globals.css">
-  <link rel="stylesheet" href="css/components.css">
+  <style>
+    body { background: var(--bg); }
+    .cr-top { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 30; }
+    .cr-top__in { max-width: 1320px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .cr-logo { font: 800 1.15rem var(--font-display); color: var(--text); text-decoration: none; letter-spacing: .02em; }
+    .cr-logo small { font: 500 .75rem var(--font-body); color: var(--text-2); margin-left: 8px; letter-spacing: 0; }
+    .cr-tabs { display: flex; gap: 4px; margin-left: 12px; flex-wrap: wrap; }
+    .cr-tabs button { border: 0; background: none; padding: 8px 14px; border-radius: 99px; font: 600 .9rem var(--font-body); color: var(--text-2); cursor: pointer; }
+    .cr-tabs button:hover { background: var(--accent-soft); }
+    .cr-tabs button.is-active { background: var(--accent); color: #fff; }
+    .cr-tabs [hidden] { display: none; }
+    .cr-who { margin-left: auto; display: flex; gap: 12px; align-items: center; font-size: .85rem; color: var(--text-2); }
+    .cr-btn { border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); padding: 8px 14px; border-radius: 10px; font: 600 .85rem var(--font-body); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .cr-btn:hover { border-color: var(--accent); }
+    .cr-btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .cr-btn--primary:hover { background: var(--accent-2); }
+    .cr-btn--danger { color: var(--danger); }
+    .cr-btn:disabled { opacity: .6; cursor: default; }
+    .cr-main { max-width: 1320px; margin: 0 auto; padding: 24px 20px 80px; }
+    .cr-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .cr-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+    .cr-kpi b { display: block; font: 800 1.9rem/1.1 var(--font-display); }
+    .cr-kpi span { color: var(--text-2); font-size: .82rem; }
+    .cr-kpi--hot b { color: var(--danger); }
+    .cr-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 20px; }
+    .cr-panel h2 { font: 700 1.05rem var(--font-display); margin: 0 0 4px; }
+    .cr-panel > p { margin: 0 0 14px; color: var(--text-2); font-size: .85rem; }
+    .cr-funnel { display: grid; gap: 7px; }
+    .cr-f { display: grid; grid-template-columns: 230px 1fr 40px; gap: 12px; align-items: center; font-size: .85rem; cursor: pointer; border-radius: 8px; padding: 2px 4px; }
+    .cr-f:hover, .cr-f.is-on { background: var(--accent-soft); }
+    .cr-f__bar { height: 12px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+    .cr-f__bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+    .cr-f--lead .cr-f__bar i { background: #D9A441; }
+    .cr-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+    .cr-bar input, .cr-bar select, .cr-form input, .cr-form select, .cr-form textarea {
+      border: 1px solid var(--border-strong); border-radius: 10px; padding: 9px 12px; background: var(--surface); font: .9rem var(--font-body); color: var(--text); min-width: 0;
+    }
+    .cr-bar input[type=search] { flex: 1 1 240px; }
+    .cr-table-wrap { overflow-x: auto; }
+    table.cr { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    table.cr th { text-align: left; padding: 10px 12px; color: var(--text-2); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    table.cr td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    table.cr tr.row { cursor: pointer; }
+    table.cr tr.row:hover td { background: var(--accent-soft); }
+    .cr-name { font-weight: 700; }
+    .cr-phone { color: var(--accent-2); font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .cr-phone:hover { text-decoration: underline; }
+    .cr-sub { color: var(--text-2); font-size: .8rem; margin-top: 2px; }
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: .75rem; font-weight: 700; white-space: nowrap; background: var(--bg); color: var(--text-2); }
+    .pill--new { background: #FFF1B8; color: #7a5b00; }
+    .pill--called, .pill--callback { background: #E4EEF8; color: #2f5a85; }
+    .pill--no_answer { background: var(--danger-soft); color: var(--danger); }
+    .pill--interested { background: #E8F3E4; color: #3f6b36; }
+    .pill--won { background: var(--success); color: #fff; }
+    .pill--lost { background: #e6e3dc; color: #6b6a63; }
+    .pill--hot { background: var(--danger); color: #fff; }
+    .cr-empty { text-align: center; color: var(--text-2); padding: 40px 10px; }
+    .cr-err { background: var(--danger-soft); color: var(--danger); padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: .9rem; }
+    .cr-ok { background: var(--success-soft); color: var(--success); padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: .9rem; }
+    .cr-pw { font: 700 1.1rem ui-monospace, Consolas, monospace; background: #fff; padding: 4px 10px; border-radius: 8px; border: 1px dashed var(--success); user-select: all; }
+    .cr-form { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); align-items: end; }
+    .cr-form label { display: grid; gap: 4px; font-size: .78rem; color: var(--text-2); font-weight: 600; }
+    /* Карточка клиента */
+    .cr-drawer-bg { position: fixed; inset: 0; background: rgba(36,39,34,.4); z-index: 50; }
+    .cr-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--bg); z-index: 51; overflow-y: auto; box-shadow: var(--shadow-lg); padding: 22px; }
+    .cr-drawer h3 { font: 800 1.35rem var(--font-display); margin: 0; }
+    .cr-drawer__x { float: right; border: 0; background: var(--surface); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; }
+    .cr-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-top: 14px; }
+    .cr-block h4 { margin: 0 0 8px; font: 700 .8rem var(--font-body); color: var(--text-2); text-transform: uppercase; letter-spacing: .05em; }
+    .cr-kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 10px; font-size: .88rem; }
+    .cr-kv dt { color: var(--text-2); } .cr-kv dd { margin: 0; font-weight: 500; }
+    .cr-stuck { background: #FFF6D6; border: 1px solid #F0DE9A; border-radius: 12px; padding: 14px 16px; margin-top: 14px; font-weight: 600; line-height: 1.5; }
+    .cr-line { position: relative; padding-left: 18px; font-size: .84rem; margin-bottom: 9px; line-height: 1.4; }
+    .cr-line::before { content: ""; position: absolute; left: 3px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .cr-line time { color: var(--text-3); display: block; font-size: .74rem; }
+    .cr-note { border-left: 3px solid var(--sand); padding: 2px 0 2px 10px; margin-bottom: 10px; font-size: .86rem; }
+    .cr-note small { color: var(--text-2); display: block; }
+    .cr-drawer .cr-form { grid-template-columns: 1fr 1fr; }
+    .cr-drawer .cr-form .wide { grid-column: 1 / -1; }
+    .cr-drawer textarea { width: 100%; min-height: 70px; resize: vertical; }
+    @media (max-width: 700px) { .cr-f { grid-template-columns: 1fr 40px; } .cr-f__bar { grid-column: 1 / -1; order: 3; } .cr-who { margin-left: 0; width: 100%; } .cr-tabs { margin-left: 0; } }
+  </style>
 </head>
 <body>
-  <div id="app-header"></div>
-
-  <main>
-    <section class="page-hero">
-      <div class="container">
-        <div id="crumbs"></div>
-        <h1 class="page-hero__title">Административная панель</h1>
-        <p class="page-hero__sub">
-          Демонстрационная панель: изменения сохраняются в localStorage вашего браузера
-          и сразу отражаются в каталогах. Это не защищённая административная система.
-        </p>
+  <header class="cr-top">
+    <div class="cr-top__in">
+      <a class="cr-logo" href="index.html">КВАДРАТ<small>Админ-панель</small></a>
+      <nav class="cr-tabs" id="tabs">
+        <button data-tab="clients" class="is-active">Клиенты</button>
+        <button data-tab="staff" data-admin hidden>Сотрудники</button>
+        <button data-tab="reviews" data-admin hidden>Отзывы</button>
+        <button data-tab="audit" data-admin hidden>Журнал</button>
+      </nav>
+      <div class="cr-who">
+        <span id="who"></span>
+        <a class="cr-btn" id="catalog-link" href="admin-catalog.html" hidden>Каталог ЖК</a>
+        <button class="cr-btn" id="logout">Выйти</button>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <section class="section section--tight">
-      <div class="container">
-        <div class="notice" style="margin-bottom:var(--space-6)">
-          <span class="notice__mark">i</span>
-          <span>Все изменения хранятся локально и не защищены авторизацией. Не публикуйте черновые планировки из исходного шаблона: это условные данные, не реальные квартиры. Перед публикацией добавьте оригинальный план, URL первоисточника, дату проверки и подтверждённые характеристики.</span>
-        </div>
-        <div class="admin-layout">
-          <nav class="admin-tabs" id="admin-tabs" aria-label="Разделы панели"></nav>
-          <div class="admin-panel">
-            <div class="admin-panel__head">
-              <h2 class="admin-panel__title" id="panel-title"></h2>
-              <div style="display:flex;gap:var(--space-2);flex-wrap:wrap">
-                <button class="btn btn--secondary btn--sm" id="btn-export" type="button">Экспорт JSON</button>
-                <button class="btn btn--secondary btn--sm" id="btn-import" type="button">Импорт JSON</button>
-                <button class="btn btn--danger btn--sm" id="btn-reset" type="button">Сбросить каталог</button>
-              </div>
-            </div>
-            <div class="admin-toolbar" id="admin-toolbar"></div>
-            <div id="admin-content"></div>
-          </div>
-        </div>
-        <input type="file" id="import-file" accept="application/json" hidden>
-      </div>
-    </section>
-  </main>
-
-  <div id="app-footer"></div>
+  <main class="cr-main" id="main"><div class="cr-empty">Загрузка…</div></main>
+  <div id="drawer-root"></div>
 
   <script src="js/data.js"></script>
-  <script src="js/store.js"></script>
-  <script src="js/estimate.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/main.js"></script>
   <script>
-    window.PAGE_KEY = 'admin';
-
-    document.addEventListener('DOMContentLoaded', () => {
-      let catalog = Store.getCatalog();
-
-      document.getElementById('crumbs').innerHTML = UI.breadcrumbs([
-        { label: 'Главная', href: 'index.html' },
-        { label: 'Админ-панель' },
-      ]);
-
-      /* ---------- Конфигурация разделов ---------- */
-
-      const PKG_OPTIONS = () => catalog.packages.map((p) => ({ value: p.slug, label: p.name }));
-      const TYPE_OPTIONS = () => Object.keys(APARTMENT_TYPES).map((t) => ({ value: t, label: APARTMENT_TYPES[t].label }));
-
-      const SECTIONS = {
-        cities: {
-          label: 'Города',
-          key: 'cities',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'slug', label: 'Slug' },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-          ],
-        },
-        developers: {
-          label: 'Застройщики',
-          key: 'developers',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'cityId', label: 'Город', render: (v) => cityName(v) },
-            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'logoText', label: 'Текст логотипа', type: 'text' },
-            { key: 'cityId', label: 'Город', type: 'select', options: () => catalog.cities.map((c) => ({ value: c.id, label: c.name })), required: true },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-            { key: 'published', label: 'Опубликован', type: 'checkbox' },
-          ],
-        },
-        complexes: {
-          label: 'ЖК',
-          key: 'complexes',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'developerId', label: 'Застройщик', render: (v) => devName(v) },
-            { key: 'class', label: 'Класс' },
-            { key: 'priority', label: 'Приоритет', render: (v) => (v ? '★' : '') },
-            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'developerId', label: 'Застройщик', type: 'select', options: () => catalog.developers.map((d) => ({ value: d.id, label: d.name })), required: true },
-            { key: 'cityId', label: 'Город', type: 'select', options: () => catalog.cities.map((c) => ({ value: c.id, label: c.name })), required: true },
-            { key: 'class', label: 'Класс', type: 'select', options: () => [{ value: 'бизнес', label: 'Бизнес' }, { value: 'комфорт', label: 'Комфорт' }] },
-            { key: 'address', label: 'Адрес', type: 'text' },
-            { key: 'year', label: 'Год ввода', type: 'number' },
-            { key: 'floors', label: 'Этажность', type: 'text' },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-            { key: 'image', label: 'Изображение (URL)', type: 'text' },
-            { key: 'gallery', label: 'Галерея (URL через запятую)', type: 'list' },
-            { key: 'priority', label: 'Приоритетный объект', type: 'checkbox' },
-            { key: 'demo', label: 'Демонстрационные данные', type: 'checkbox' },
-            { key: 'published', label: 'Опубликован', type: 'checkbox' },
-          ],
-        },
-        apartments: {
-          label: 'Планировки',
-          key: 'apartments',
-          columns: [
-            { key: 'type', label: 'Тип', render: (v) => (APARTMENT_TYPES[v] ? APARTMENT_TYPES[v].label : v) },
-            { key: 'area', label: 'Площадь', render: (v) => v + ' м²' },
-            { key: 'complexId', label: 'ЖК', render: (v) => complexName(v) },
-            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
-          ],
-          fields: [
-            { key: 'complexId', label: 'Жилой комплекс', type: 'select', options: () => catalog.complexes.map((c) => ({ value: c.id, label: c.name })), required: true },
-            { key: 'type', label: 'Тип', type: 'select', options: TYPE_OPTIONS, required: true },
-            { key: 'area', label: 'Площадь, м²', type: 'number', required: true },
-            { key: 'rooms', label: 'Комнат', type: 'number', required: true },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-            { key: 'published', label: 'Опубликован', type: 'checkbox' },
-          ],
-        },
-        designs: {
-          label: 'Дизайн-проекты',
-          key: 'designs',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'style', label: 'Стиль' },
-            { key: 'priceLevel', label: 'Ценовой уровень' },
-            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'style', label: 'Стиль', type: 'text', required: true },
-            { key: 'packageLevel', label: 'Комплектация', type: 'select', options: PKG_OPTIONS, required: true },
-            { key: 'priceLevel', label: 'Ценовой уровень', type: 'text' },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-            { key: 'image', label: 'Изображение (URL)', type: 'text' },
-            { key: 'gallery', label: 'Галерея (URL через запятую)', type: 'list' },
-            { key: 'palette', label: 'Палитра (HEX через запятую)', type: 'list' },
-            { key: 'materials', label: 'Материалы (через запятую)', type: 'list' },
-            { key: 'suitableTypes', label: 'Подходящие типы квартир', type: 'list', options: TYPE_OPTIONS },
-            { key: 'published', label: 'Опубликован', type: 'checkbox' },
-          ],
-        },
-        packages: {
-          label: 'Комплектации',
-          key: 'packages',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'worksRate', label: 'Работы, ₽/м²' },
-            { key: 'roughRate', label: 'Черновые, ₽/м²' },
-            { key: 'published', label: 'Статус', render: (v) => pubBadge(v) },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'worksRate', label: 'Ставка работ, ₽/м²', type: 'number', required: true },
-            { key: 'roughRate', label: 'Ставка черновых материалов, ₽/м²', type: 'number', required: true },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-            { key: 'published', label: 'Опубликован', type: 'checkbox' },
-          ],
-        },
-        materials: {
-          label: 'Материалы',
-          key: 'materials',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'category', label: 'Категория', render: (v) => catLabel(v) },
-            { key: 'price', label: 'Цена', render: (v) => UI.formatMoney(v) },
-            { key: 'unit', label: 'Ед.' },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'category', label: 'Категория', type: 'select', options: () => MATERIAL_CATEGORIES.map((c) => ({ value: c.key, label: c.label })), required: true },
-            { key: 'unit', label: 'Единица измерения', type: 'text', required: true },
-            { key: 'price', label: 'Цена, ₽', type: 'number', required: true },
-            { key: 'includedIn', label: 'Включён в комплектации (slug через запятую)', type: 'list', options: PKG_OPTIONS },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-          ],
-        },
-        options: {
-          label: 'Дополнительные опции',
-          key: 'options',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'price', label: 'Цена', render: (v) => UI.formatMoney(v) },
-            { key: 'unit', label: 'Ед.' },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'unit', label: 'Единица измерения', type: 'text', required: true },
-            { key: 'price', label: 'Цена, ₽', type: 'number', required: true },
-            { key: 'qty', label: 'Количество (число или area)', type: 'text', required: true },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-          ],
-        },
-        kitchens: {
-          label: 'Кухни',
-          key: 'kitchens',
-          columns: [
-            { key: 'name', label: 'Название' },
-            { key: 'price', label: 'Цена', render: (v) => UI.formatMoney(v) },
-          ],
-          fields: [
-            { key: 'name', label: 'Название', type: 'text', required: true },
-            { key: 'slug', label: 'Slug', type: 'text', required: true },
-            { key: 'unit', label: 'Единица измерения', type: 'text', required: true },
-            { key: 'price', label: 'Цена, ₽', type: 'number', required: true },
-            { key: 'description', label: 'Описание', type: 'textarea' },
-          ],
-        },
+    (function () {
+      'use strict';
+      const $ = (s, r) => (r || document).querySelector(s);
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const money = (n) => n ? new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽' : '—';
+      const dt = (t) => t ? new Date(t).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+      const ago = (t) => {
+        if (!t) return '—';
+        const m = Math.round((Date.now() - t) / 60000);
+        if (m < 1) return 'только что';
+        if (m < 60) return m + ' мин назад';
+        if (m < 1440) return Math.round(m / 60) + ' ч назад';
+        return Math.round(m / 1440) + ' дн. назад';
+      };
+      const STATUS = { new: 'Новый — позвонить', called: 'Дозвонились', no_answer: 'Не дозвонились', callback: 'Перезвонить', interested: 'Заинтересован', won: 'Договор', lost: 'Отказ' };
+      const ROLE = { admin: 'Администратор', manager: 'Менеджер' };
+      const ACTION = {
+        staff_create: 'создал сотрудника', staff_reset: 'сбросил пароль сотрудника', staff_toggle: 'вкл/выкл сотрудника', client_delete: 'удалил клиента',
+        view_client: 'открыл карточку клиента', call_update: 'обновил статус звонка', review_publish: 'опубликовал отзыв', review_hide: 'скрыл отзыв',
+        review_delete: 'удалил отзыв', export: 'выгрузил CSV', password_change: 'сменил пароль', login: 'вошёл', login_fail: 'неудачный вход',
       };
 
-      const TAB_ORDER = ['cities', 'developers', 'complexes', 'apartments', 'designs', 'packages', 'materials', 'kitchens', 'options', 'prices', 'requests'];
+      let me = null, tab = 'clients', clients = [], stages = {}, stageFilter = '', stageNames = {};
+      let flash = null;
 
-      /* ---------- Хелперы ---------- */
-
-      function cityName(id) {
-        const c = catalog.cities.find((x) => x.id === id);
-        return c ? c.name : id;
-      }
-      function devName(id) {
-        const d = catalog.developers.find((x) => x.id === id);
-        return d ? d.name : id;
-      }
-      function complexName(id) {
-        const c = catalog.complexes.find((x) => x.id === id);
-        return c ? c.name : id;
-      }
-      function catLabel(key) {
-        const c = MATERIAL_CATEGORIES.find((x) => x.key === key);
-        return c ? c.label : key;
-      }
-      function pubBadge(v) {
-        return v ? '<span class="badge">Опубликован</span>' : '<span class="badge badge--outline">Черновик</span>';
-      }
-
-      function persist() {
-        Store.saveCatalog(catalog);
-      }
-
-      function uid(prefix) {
-        return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      }
-
-      /* ---------- Вкладки ---------- */
-
-      let activeTab = 'complexes';
-      let searchQuery = '';
-
-      const tabsEl = document.getElementById('admin-tabs');
-      const panelTitle = document.getElementById('panel-title');
-      const toolbarEl = document.getElementById('admin-toolbar');
-      const contentEl = document.getElementById('admin-content');
-
-      function renderTabs() {
-        tabsEl.innerHTML = TAB_ORDER.map((key) => {
-          const label = key === 'prices' ? 'Цены' : key === 'requests' ? 'Заявки' : SECTIONS[key].label;
-          const count = key === 'prices' ? '' : key === 'requests' ? Store.getRequests().length : catalog[key].length;
-          return `<button class="admin-tab ${key === activeTab ? 'is-active' : ''}" data-tab="${key}">
-            <span>${label}</span>${count !== '' ? `<span class="fav-count">${count}</span>` : ''}
-          </button>`;
-        }).join('');
-        UI.qsa('.admin-tab', tabsEl).forEach((t) =>
-          t.addEventListener('click', () => {
-            activeTab = t.dataset.tab;
-            searchQuery = '';
-            renderTabs();
-            renderPanel();
-          })
-        );
-      }
-
-      /* ---------- Рендер разделов ---------- */
-
-      function renderPanel() {
-        if (activeTab === 'prices') return renderPrices();
-        if (activeTab === 'requests') return renderRequests();
-        renderCrud();
-      }
-
-      function renderCrud() {
-        const section = SECTIONS[activeTab];
-        panelTitle.textContent = section.label;
-
-        toolbarEl.innerHTML = `
-          <input class="input" id="crud-search" type="search" placeholder="Поиск по ${section.label.toLowerCase()}…" value="${UI.escapeHtml(searchQuery)}">
-          <button class="btn btn--primary btn--sm" id="btn-add" type="button">+ Добавить</button>`;
-
-        const searchEl = document.getElementById('crud-search');
-        searchEl.addEventListener('input', () => {
-          searchQuery = searchEl.value;
-          renderTable();
+      async function api(method, url, body) {
+        const res = await fetch(url, {
+          method, credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'kvadrat' },
+          body: body ? JSON.stringify(body) : undefined,
         });
-        document.getElementById('btn-add').addEventListener('click', () => openForm(section, null));
-
-        renderTable();
+        let data = {};
+        try { data = await res.json(); } catch (e) { /* */ }
+        if (res.status === 401) { location.href = 'login.html?next=admin.html'; throw new Error('auth'); }
+        if (!res.ok || data.ok === false) throw new Error(data.error || 'Ошибка ' + res.status);
+        return data;
       }
 
-      function renderTable() {
-        const section = SECTIONS[activeTab];
-        const q = searchQuery.toLowerCase();
-        const list = catalog[section.key].filter((item) => {
-          if (!q) return true;
-          return section.columns.some((col) => String(item[col.key] || '').toLowerCase().includes(q));
-        });
+      /* ---------- Каталог для расшифровки избранного ---------- */
+      const nameOf = (list, id) => { const x = (list || []).find((i) => i.id === id); return x ? x.name : id; };
+      const favText = (f) => {
+        f = f || {};
+        const parts = [];
+        (f.complexes || []).forEach((id) => parts.push('ЖК: ' + nameOf(DEFAULT_COMPLEXES, id)));
+        (f.designs || []).forEach((id) => parts.push('Дизайн: ' + nameOf(DEFAULT_DESIGNS, id)));
+        (f.apartments || []).forEach((id) => parts.push('Квартира: ' + id));
+        return parts;
+      };
 
-        if (!list.length) {
-          contentEl.innerHTML = UI.emptyState('Ничего не найдено', 'Измените поиск или добавьте новую запись.');
-          return;
-        }
+      /* ---------- Клиенты ---------- */
+      function stageLabel(c) { return c.stage; }
 
-        contentEl.innerHTML = `
-          <div style="overflow-x:auto">
-            <table class="table">
-              <thead><tr>
-                ${section.columns.map((c) => `<th>${c.label}</th>`).join('')}
-                <th style="text-align:right">Действия</th>
-              </tr></thead>
-              <tbody>
-                ${list
-                  .map((item) => {
-                    const cells = section.columns
-                      .map((c) => {
-                        const v = item[c.key];
-                        const rendered = c.render ? c.render(v, item) : UI.escapeHtml(String(v == null ? '' : v));
-                        return `<td>${rendered}</td>`;
-                      })
-                      .join('');
-                    const pubBtn =
-                      section.key === 'cities'
-                        ? ''
-                        : `<button class="icon-btn" data-act="publish" data-id="${item.id}" title="${item.published ? 'Снять с публикации' : 'Опубликовать'}" aria-label="Переключить публикацию">${item.published ? '◉' : '○'}</button>`;
-                    return `<tr>
-                      ${cells}
-                      <td><div class="table__actions">
-                        ${pubBtn}
-                        <button class="icon-btn" data-act="edit" data-id="${item.id}" title="Редактировать" aria-label="Редактировать">✎</button>
-                        <button class="icon-btn icon-btn--danger" data-act="delete" data-id="${item.id}" title="Удалить" aria-label="Удалить">✕</button>
-                      </div></td>
-                    </tr>`;
-                  })
-                  .join('')}
-              </tbody>
-            </table>
-          </div>`;
+      function renderClients() {
+        const hot = clients.filter((c) => c.call.status === 'new').length;
+        const reqs = clients.filter((c) => c.requests > 0).length;
+        const week = clients.filter((c) => Date.now() - c.createdAt < 7 * 864e5).length;
+        const lost = clients.filter((c) => !c.requests && c.stageCode !== 'registered').length;
 
-        UI.qsa('[data-act]', contentEl).forEach((btn) => {
-          btn.addEventListener('click', async () => {
-            const id = btn.dataset.id;
-            const act = btn.dataset.act;
-            if (act === 'edit') {
-              const item = catalog[section.key].find((x) => x.id === id);
-              openForm(section, item);
-            } else if (act === 'publish') {
-              const item = catalog[section.key].find((x) => x.id === id);
-              item.published = !item.published;
-              persist();
-              renderTable();
-              UI.toast(item.published ? 'Опубликовано' : 'Снято с публикации');
-            } else if (act === 'delete') {
-              const ok = await UI.confirmDialog('Удалить запись? Действие необратимо.');
-              if (!ok) return;
-              catalog[section.key] = catalog[section.key].filter((x) => x.id !== id);
-              persist();
-              renderTabs();
-              renderTable();
-              UI.toast('Запись удалена');
-            }
-          });
-        });
-      }
-
-      /* ---------- Форма добавления/редактирования ---------- */
-
-      function openForm(section, entity) {
-        const isEdit = !!entity;
-        const values = entity ? { ...entity } : { published: true };
-
-        let html = '';
-        for (const f of section.fields) {
-          const val = values[f.key];
-          let input = '';
-          if (f.type === 'textarea') {
-            input = `<textarea class="textarea" data-field="${f.key}">${UI.escapeHtml(val || '')}</textarea>`;
-          } else if (f.type === 'checkbox') {
-            input = `<label class="checkbox"><input type="checkbox" data-field="${f.key}" ${val ? 'checked' : ''}><span>${f.label}</span></label>`;
-          } else if (f.type === 'select') {
-            const opts = f.options ? f.options() : [];
-            input = `<select class="select" data-field="${f.key}">
-              <option value="">— Выберите —</option>
-              ${opts.map((o) => `<option value="${UI.escapeHtml(o.value)}" ${String(val) === String(o.value) ? 'selected' : ''}>${UI.escapeHtml(o.label)}</option>`).join('')}
-            </select>`;
-          } else if (f.type === 'list') {
-            const listVal = Array.isArray(val) ? val.join(', ') : '';
-            input = `<input class="input" data-field="${f.key}" type="text" value="${UI.escapeHtml(listVal)}">`;
-          } else {
-            input = `<input class="input" data-field="${f.key}" type="${f.type === 'number' ? 'number' : 'text'}" value="${UI.escapeHtml(val == null ? '' : val)}">`;
-          }
-          if (f.type === 'checkbox') {
-            html += `<div class="field" style="margin-bottom:var(--space-4)">${input}</div>`;
-          } else {
-            html += `<div class="field" style="margin-bottom:var(--space-4)">
-              <label class="field__label" for="f-${f.key}">${f.label}${f.required ? ' *' : ''}</label>
-              ${input}
-              <span class="field__error" data-error="${f.key}">Заполните поле</span>
-            </div>`;
-          }
-        }
-
-        const m = UI.modal(html, { title: isEdit ? `Редактирование: ${entity.name || entity.id}` : `Новая запись: ${section.label}` });
-
-        const actions = document.createElement('div');
-        actions.className = 'modal-card__actions';
-        actions.innerHTML = `
-          <button class="btn btn--secondary" data-act="cancel">Отмена</button>
-          <button class="btn btn--primary" data-act="save">Сохранить</button>`;
-        m.el.querySelector('.modal-card').appendChild(actions);
-
-        actions.querySelector('[data-act="cancel"]').addEventListener('click', () => m.close());
-
-        actions.querySelector('[data-act="save"]').addEventListener('click', () => {
-          const data = {};
-          let valid = true;
-
-          for (const f of section.fields) {
-            const input = m.el.querySelector(`[data-field="${f.key}"]`);
-            if (!input) continue;
-            let v;
-            if (f.type === 'checkbox') {
-              v = input.checked;
-            } else if (f.type === 'number') {
-              v = input.value === '' ? null : Number(input.value);
-            } else if (f.type === 'list') {
-              v = input.value
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean);
-            } else {
-              v = input.value.trim();
-            }
-
-            if (f.required && (v === '' || v === null || v === undefined)) {
-              valid = false;
-              const field = input.closest('.field');
-              if (field) field.classList.add('has-error');
-              continue;
-            }
-            data[f.key] = v;
-          }
-
-          /* Уникальность slug */
-          if (data.slug && section.key !== 'cities') {
-            const dup = catalog[section.key].some((x) => x.slug === data.slug && x.id !== (entity ? entity.id : null));
-            if (dup) {
-              valid = false;
-              UI.toast('Запись с таким slug уже существует');
-            }
-          }
-
-          if (!valid) {
-            UI.toast('Проверьте заполнение обязательных полей');
-            return;
-          }
-
-          if (isEdit) {
-            Object.assign(entity, data);
-          } else {
-            data.id = uid(section.key === 'complexes' ? 'cx' : section.key === 'apartments' ? 'apt' : section.key === 'designs' ? 'ds' : section.key === 'developers' ? 'dev' : section.key === 'cities' ? 'c' : section.key === 'packages' ? 'pkg' : section.key === 'materials' ? 'mat' : section.key === 'kitchens' ? 'kit' : section.key === 'options' ? 'opt' : 'id');
-            if (data.published === undefined) data.published = true;
-            catalog[section.key].push(data);
-          }
-
-          persist();
-          m.close();
-          renderTabs();
-          renderTable();
-          UI.toast('Сохранено');
-        });
-      }
-
-      /* ---------- Цены ---------- */
-
-      function renderPrices() {
-        panelTitle.textContent = 'Цены';
-        toolbarEl.innerHTML = `
-          <span class="tag">Комплектации</span>
-          <span class="tag">Материалы</span>
-          <span class="tag">Кухни</span>
-          <span class="tag">Опции</span>`;
-
-        const rows = [];
-        for (const p of catalog.packages) {
-          rows.push({ type: 'Комплектация', name: p.name + ' · работы', price: p.worksRate, unit: '₽/м²', id: p.id, key: 'packages', field: 'worksRate' });
-          rows.push({ type: 'Комплектация', name: p.name + ' · черновые', price: p.roughRate, unit: '₽/м²', id: p.id, key: 'packages', field: 'roughRate' });
-        }
-        for (const m of catalog.materials) {
-          rows.push({ type: 'Материал', name: m.name, price: m.price, unit: m.unit, id: m.id, key: 'materials', field: 'price' });
-        }
-        for (const k of catalog.kitchens) {
-          rows.push({ type: 'Кухня', name: k.name, price: k.price, unit: k.unit, id: k.id, key: 'kitchens', field: 'price' });
-        }
-        for (const o of catalog.options) {
-          rows.push({ type: 'Опция', name: o.name, price: o.price, unit: o.unit, id: o.id, key: 'options', field: 'price' });
-        }
-
-        contentEl.innerHTML = `
-          <div style="overflow-x:auto">
-            <table class="table">
-              <thead><tr><th>Тип</th><th>Наименование</th><th>Цена</th><th>Ед.</th><th style="text-align:right">Действия</th></tr></thead>
-              <tbody>
-                ${rows
-                  .map(
-                    (r) => `<tr>
-                      <td><span class="tag">${r.type}</span></td>
-                      <td>${UI.escapeHtml(r.name)}</td>
-                      <td>${UI.formatMoney(r.price)}</td>
-                      <td>${UI.escapeHtml(r.unit)}</td>
-                      <td><div class="table__actions">
-                        <button class="icon-btn" data-price-edit="${r.id}" data-key="${r.key}" data-field="${r.field}" title="Изменить цену" aria-label="Изменить цену">✎</button>
-                      </div></td>
-                    </tr>`
-                  )
-                  .join('')}
-              </tbody>
-            </table>
-          </div>`;
-
-        UI.qsa('[data-price-edit]', contentEl).forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const item = catalog[btn.dataset.key].find((x) => x.id === btn.dataset.priceEdit);
-            if (!item) return;
-            const m = UI.modal(
-              `<div class="field">
-                <label class="field__label" for="price-input">Новая цена, ₽</label>
-                <input class="input" id="price-input" type="number" value="${item[btn.dataset.field]}">
-              </div>`,
-              { title: `Цена: ${item.name}` }
-            );
-            const actions = document.createElement('div');
-            actions.className = 'modal-card__actions';
-            actions.innerHTML = `<button class="btn btn--secondary" data-act="cancel">Отмена</button><button class="btn btn--primary" data-act="save">Сохранить</button>`;
-            m.el.querySelector('.modal-card').appendChild(actions);
-            actions.querySelector('[data-act="cancel"]').addEventListener('click', () => m.close());
-            actions.querySelector('[data-act="save"]').addEventListener('click', () => {
-              const v = Number(document.getElementById('price-input').value);
-              if (!v || v <= 0) {
-                UI.toast('Укажите корректную цену');
-                return;
-              }
-              item[btn.dataset.field] = v;
-              persist();
-              m.close();
-              renderPrices();
-              UI.toast('Цена обновлена');
-            });
-          });
-        });
-      }
-
-      /* ---------- Заявки ---------- */
-
-      function renderRequests() {
-        panelTitle.textContent = 'Заявки';
-        toolbarEl.innerHTML = `<span class="tag">Демонстрационные заявки, сохранённые локально</span>`;
-
-        const requests = Store.getRequests();
-        if (!requests.length) {
-          contentEl.innerHTML = UI.emptyState('Заявок пока нет', 'Заявки, отправленные через форму на странице «Заявка», появятся здесь.');
-          return;
-        }
-
-        contentEl.innerHTML = `
-          <div style="overflow-x:auto">
-            <table class="table">
-              <thead><tr><th>Дата</th><th>Имя</th><th>Телефон</th><th>E-mail</th><th>Сумма</th><th style="text-align:right">Действия</th></tr></thead>
-              <tbody>
-                ${requests
-                  .map(
-                    (r) => `<tr>
-                      <td>${new Date(r.createdAt).toLocaleString('ru-RU')}</td>
-                      <td>${UI.escapeHtml(r.name)}</td>
-                      <td>${UI.escapeHtml(r.phone)}</td>
-                      <td>${UI.escapeHtml(r.email || '—')}</td>
-                      <td>${UI.formatMoney(r.total)}</td>
-                      <td><div class="table__actions">
-                        <button class="icon-btn" data-req-view="${r.id}" title="Просмотр" aria-label="Просмотр">👁</button>
-                        <button class="icon-btn icon-btn--danger" data-req-del="${r.id}" title="Удалить" aria-label="Удалить">✕</button>
-                      </div></td>
-                    </tr>`
-                  )
-                  .join('')}
-              </tbody>
-            </table>
-          </div>`;
-
-        UI.qsa('[data-req-view]', contentEl).forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const r = requests.find((x) => x.id === btn.dataset.reqView);
-            if (!r) return;
-            const cfg = r.config || {};
-            const lines = [
-              ['Имя', r.name],
-              ['Телефон', r.phone],
-              ['E-mail', r.email || '—'],
-              ['Комментарий', r.comment || '—'],
-              ['ЖК', complexName(cfg.complexId)],
-              ['Квартира', cfg.apartmentId || '—'],
-              ['Дизайн', cfg.designId || '—'],
-              ['Комплектация', cfg.packageId || '—'],
-              ['Сумма', UI.formatMoney(r.total)],
-            ];
-            UI.modal(
-              lines.map((l) => `<div class="estimate__row"><div class="estimate__row-name">${l[0]}</div><div class="estimate__row-value">${UI.escapeHtml(l[1])}</div></div>`).join(''),
-              { title: 'Заявка от ' + new Date(r.createdAt).toLocaleString('ru-RU') }
-            );
-          });
-        });
-
-        UI.qsa('[data-req-del]', contentEl).forEach((btn) => {
-          btn.addEventListener('click', async () => {
-            const ok = await UI.confirmDialog('Удалить заявку?');
-            if (!ok) return;
-            Store.removeRequest(btn.dataset.reqDel);
-            renderTabs();
-            renderRequests();
-            UI.toast('Заявка удалена');
-          });
-        });
-      }
-
-      /* ---------- Импорт / экспорт / сброс ---------- */
-
-      document.getElementById('btn-export').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(catalog, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'kvadrat-catalog.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        UI.toast('Каталог экспортирован');
-      });
-
-      const importFile = document.getElementById('import-file');
-      document.getElementById('btn-import').addEventListener('click', () => importFile.click());
-      importFile.addEventListener('change', () => {
-        const file = importFile.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const data = JSON.parse(reader.result);
-            const required = ['cities', 'developers', 'complexes', 'apartments', 'designs', 'packages', 'materials', 'kitchens', 'options'];
-            const ok = required.every((k) => Array.isArray(data[k]));
-            if (!ok || data.schemaVersion !== KVADRAT_SCHEMA_VERSION) {
-              UI.toast('Структура файла не соответствует каталогу');
-              return;
-            }
-            catalog = data;
-            persist();
-            renderTabs();
-            renderPanel();
-            UI.toast('Каталог импортирован');
-          } catch (e) {
-            UI.toast('Не удалось прочитать JSON-файл');
-          }
+        const order = ['registered', 'catalog', 'step1', 'step2', 'step3', 'step4', 'step5', 'step6', 'step7', 'step8', 'estimate', 'request_form', 'request'];
+        const names = {
+          registered: 'Зарегистрировался и ушёл', catalog: 'Смотрел жилые комплексы', step1: 'Шаг 1 · Квартира', step2: 'Шаг 2 · Дизайн',
+          step3: 'Шаг 3 · Комплектация', step4: 'Шаг 4 · Материалы', step5: 'Шаг 5 · Кухня', step6: 'Шаг 6 · Опции', step7: 'Шаг 7 · Итог',
+          step8: 'Шаг 8 · Смета', estimate: 'Смотрел смету', request_form: 'Открыл форму заявки', request: 'Оставил заявку',
         };
-        reader.readAsText(file);
-        importFile.value = '';
-      });
+        stageNames = names;
+        const max = Math.max(1, ...order.map((k) => stages[k] || 0));
 
-      document.getElementById('btn-reset').addEventListener('click', async () => {
-        const ok = await UI.confirmDialog('Сбросить каталог к демонстрационным данным по умолчанию?', { confirmText: 'Сбросить', danger: true });
-        if (!ok) return;
-        Store.resetCatalog();
-        catalog = Store.getCatalog();
-        renderTabs();
-        renderPanel();
-        UI.toast('Каталог сброшен');
-      });
+        const q = ($('#q') && $('#q').value || '').trim().toLowerCase();
+        const st = $('#st') ? $('#st').value : '';
+        const list = clients.filter((c) => {
+          if (stageFilter && c.stageCode !== stageFilter) return false;
+          if (st && c.call.status !== st) return false;
+          if (q && !(c.name + ' ' + c.phone + ' ' + c.complex).toLowerCase().includes(q)) return false;
+          return true;
+        });
 
-      /* ---------- Старт ---------- */
-      renderTabs();
-      renderPanel();
-    });
+        const keepQ = $('#q') ? $('#q').value : '';
+        const keepSt = st;
+        $('#main').innerHTML = `
+          ${flash ? flash : ''}
+          <div class="cr-kpis">
+            <div class="cr-kpi"><b>${clients.length}</b><span>Всего клиентов</span></div>
+            <div class="cr-kpi"><b>${week}</b><span>Новых за 7 дней</span></div>
+            <div class="cr-kpi cr-kpi--hot"><b>${hot}</b><span>Ждут первого звонка</span></div>
+            <div class="cr-kpi"><b>${reqs}</b><span>Оставили заявку</span></div>
+            <div class="cr-kpi"><b>${lost}</b><span>Начали, но не оставили заявку</span></div>
+          </div>
+
+          <section class="cr-panel">
+            <h2>Где люди отваливаются</h2>
+            <p>Сколько клиентов остановилось на каждом этапе. Нажмите на строку — в таблице останутся только эти люди.</p>
+            <div class="cr-funnel">
+              ${order.map((k) => `
+                <div class="cr-f ${k === 'request' ? 'cr-f--lead' : ''} ${stageFilter === k ? 'is-on' : ''}" data-stage="${k}">
+                  <span>${esc(names[k])}</span><div class="cr-f__bar"><i style="width:${(stages[k] || 0) / max * 100}%"></i></div><b>${stages[k] || 0}</b>
+                </div>`).join('')}
+            </div>
+          </section>
+
+          <section class="cr-panel">
+            <div class="cr-bar">
+              <input type="search" id="q" placeholder="Поиск: имя, телефон, ЖК" value="${esc(keepQ)}">
+              <select id="st"><option value="">Все статусы звонка</option>${Object.keys(STATUS).map((k) => `<option value="${k}" ${keepSt === k ? 'selected' : ''}>${STATUS[k]}</option>`).join('')}</select>
+              ${stageFilter ? `<button class="cr-btn" id="clear-stage">Этап: ${esc(names[stageFilter])} ✕</button>` : ''}
+              <button class="cr-btn" id="refresh">Обновить</button>
+              ${me.role === 'admin' ? '<a class="cr-btn" href="/api/admin/export.csv" id="csv">Скачать CSV</a>' : ''}
+            </div>
+            <div class="cr-table-wrap">
+            ${list.length ? `<table class="cr">
+              <thead><tr><th>Клиент</th><th>Где остановился</th><th>Что выбрал</th><th>Статус</th><th>Активность</th></tr></thead>
+              <tbody>${list.map((c) => `
+                <tr class="row" data-id="${esc(c.id)}">
+                  <td><div class="cr-name">${esc(c.name)}</div><a class="cr-phone" href="tel:${esc(c.phone)}" data-tel>${esc(c.phone)}</a></td>
+                  <td>${esc(stageLabel(c))}${c.current ? `<div class="cr-sub">Последняя страница: ${esc(c.current)}</div>` : ''}</td>
+                  <td>${c.complex ? esc(c.complex) : '—'}${c.design ? `<div class="cr-sub">${esc(c.design)}${c.pkg ? ' · ' + esc(c.pkg) : ''}</div>` : ''}${c.total ? `<div class="cr-sub">${money(c.total)}${c.area ? ' · ' + c.area + ' м²' : ''}</div>` : ''}${c.favCount ? `<div class="cr-sub">♡ в избранном: ${c.favCount}</div>` : ''}</td>
+                  <td><span class="pill pill--${esc(c.call.status)}">${esc(STATUS[c.call.status] || c.call.status)}</span>${c.requests ? '<div class="cr-sub"><span class="pill pill--hot">Заявка</span></div>' : ''}${c.call.nextAt ? `<div class="cr-sub">Связаться: ${esc(c.call.nextAt)}</div>` : ''}</td>
+                  <td>${ago(c.lastSeen)}<div class="cr-sub">рег. ${dt(c.createdAt)}</div></td>
+                </tr>`).join('')}</tbody></table>` : '<div class="cr-empty">Клиентов по этим условиям нет.</div>'}
+            </div>
+          </section>`;
+
+        $('#q').addEventListener('input', () => { const pos = $('#q').selectionStart; renderClients(); $('#q').focus(); $('#q').setSelectionRange(pos, pos); });
+        $('#st').addEventListener('change', renderClients);
+        $('#refresh').addEventListener('click', loadClients);
+        const cl = $('#clear-stage'); if (cl) cl.addEventListener('click', () => { stageFilter = ''; renderClients(); });
+        document.querySelectorAll('.cr-f').forEach((el) => el.addEventListener('click', () => { stageFilter = stageFilter === el.dataset.stage ? '' : el.dataset.stage; renderClients(); }));
+        document.querySelectorAll('tr.row').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('[data-tel]')) return; openClient(tr.dataset.id); }));
+        flash = null;
+      }
+
+      async function loadClients() {
+        try {
+          const r = await api('GET', '/api/admin/clients');
+          clients = r.clients; stages = r.stages;
+          renderClients();
+        } catch (e) { if (e.message !== 'auth') $('#main').innerHTML = `<div class="cr-err">${esc(e.message)}</div>`; }
+      }
+
+      /* ---------- Карточка клиента ---------- */
+      async function openClient(id) {
+        const root = $('#drawer-root');
+        root.innerHTML = '<div class="cr-drawer-bg"></div><aside class="cr-drawer"><div class="cr-empty">Загрузка…</div></aside>';
+        const close = () => { root.innerHTML = ''; };
+        $('.cr-drawer-bg', root).addEventListener('click', close);
+        let c;
+        try { c = (await api('GET', '/api/admin/clients/' + encodeURIComponent(id))).client; }
+        catch (e) { $('.cr-drawer', root).innerHTML = `<div class="cr-err">${esc(e.message)}</div>`; return; }
+
+        const favs = favText(c.favorites);
+        const p = c.progress || {};
+        const consent = c.consent;
+        $('.cr-drawer', root).innerHTML = `
+          <button class="cr-drawer__x" id="dx" aria-label="Закрыть">✕</button>
+          <h3>${esc(c.name)}</h3>
+          <div style="margin-top:4px"><a class="cr-phone" style="font-size:1.1rem" href="tel:${esc(c.phone)}">📞 ${esc(c.phone)}</a>
+            <span class="pill pill--${esc(c.call.status)}" style="margin-left:8px">${esc(STATUS[c.call.status] || '')}</span></div>
+
+          <div class="cr-stuck">Где остановился: ${esc(c.stage)}${c.current ? `<div style="font-weight:400;margin-top:4px;font-size:.85rem">Последняя страница: ${esc(c.current)}</div>` : ''}</div>
+
+          <div class="cr-block"><h4>Что выбрал</h4>
+            <dl class="cr-kv">
+              <dt>Жилой комплекс</dt><dd>${esc(p.complex || p.viewedComplex || '—')}</dd>
+              <dt>Дизайн</dt><dd>${esc(p.design || '—')}</dd>
+              <dt>Комплектация</dt><dd>${esc(p.pkg || '—')}</dd>
+              <dt>Кухня</dt><dd>${esc(p.kitchen || '—')}</dd>
+              <dt>Площадь</dt><dd>${p.area ? esc(p.area) + ' м²' : '—'}</dd>
+              <dt>Предв. стоимость</dt><dd>${money(p.total)}</dd>
+              <dt>Макс. шаг</dt><dd>${p.maxStep ? esc(p.maxStep) + ' из 8' : '—'}</dd>
+            </dl></div>
+
+          ${favs.length ? `<div class="cr-block"><h4>Избранное</h4>${favs.map((f) => `<div style="font-size:.88rem;margin-bottom:3px">♡ ${esc(f)}</div>`).join('')}</div>` : ''}
+
+          ${(c.requests || []).length ? `<div class="cr-block"><h4>Заявки</h4>${c.requests.map((r) => `
+            <div class="cr-note"><small>${dt(r.t)} · ${esc(r.name)} · ${esc(r.phone)}${r.email ? ' · ' + esc(r.email) : ''}</small>
+              ${esc(r.complex || '')} ${r.design ? '· ' + esc(r.design) : ''} ${r.pkg ? '· ' + esc(r.pkg) : ''} ${r.area ? '· ' + esc(r.area) + ' м²' : ''} ${r.total ? '· ' + money(r.total) : ''}
+              ${r.comment ? `<div style="margin-top:3px">«${esc(r.comment)}»</div>` : ''}</div>`).join('')}</div>` : ''}
+
+          <div class="cr-block"><h4>Звонок</h4>
+            <form class="cr-form" id="callform">
+              <label>Статус<select name="status">${Object.keys(STATUS).map((k) => `<option value="${k}" ${c.call.status === k ? 'selected' : ''}>${STATUS[k]}</option>`).join('')}</select></label>
+              <label>Когда связаться<input type="datetime-local" name="nextAt" value="${esc(c.call.nextAt || '')}"></label>
+              <label class="wide">Заметка (что сказал клиент, что его оттолкнуло)<textarea name="note" maxlength="600" placeholder="Например: «дорого», «ещё выбирает ЖК», «просил перезвонить в пятницу»"></textarea></label>
+              <div class="wide"><button class="cr-btn cr-btn--primary" type="submit">Сохранить</button> <span id="callmsg" style="font-size:.85rem;color:var(--success)"></span></div>
+            </form>
+            ${(c.notes || []).length ? `<div style="margin-top:14px">${c.notes.map((n) => `<div class="cr-note"><small>${dt(n.t)} · ${esc(n.by)} · ${esc(STATUS[n.status] || '')}</small>${esc(n.text)}</div>`).join('')}</div>` : ''}
+          </div>
+
+          <div class="cr-block"><h4>Путь по сайту (последние действия)</h4>
+            ${(c.events || []).length ? c.events.map((e) => `<div class="cr-line"><time>${dt(e.t)}</time>${esc(e.text)}</div>`).join('') : '<div class="cr-sub">Пока нет действий</div>'}
+          </div>
+
+          <div class="cr-block"><h4>Согласия и аккаунт</h4>
+            <dl class="cr-kv">
+              <dt>Регистрация</dt><dd>${dt(c.createdAt)}</dd>
+              <dt>Последний вход</dt><dd>${dt(c.lastLogin)}</dd>
+              <dt>Обработка ПД</dt><dd>${consent && consent.privacy ? 'дано ' + dt(consent.at) : 'нет'}</dd>
+              <dt>Польз. соглашение</dt><dd>${consent && consent.terms ? 'принято, ред. ' + esc(consent.version || '') : 'нет'}</dd>
+            </dl>
+            ${me.role === 'admin' ? '<div style="margin-top:12px"><button class="cr-btn cr-btn--danger" id="del">Удалить клиента и все его данные</button></div>' : ''}
+          </div>`;
+        $('#dx', root).addEventListener('click', close);
+        $('#callform', root).addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const f = e.target; const btn = f.querySelector('button'); btn.disabled = true;
+          try {
+            await api('POST', '/api/admin/clients/' + encodeURIComponent(id) + '/call', { status: f.status.value, note: f.note.value.trim(), nextAt: f.nextAt.value || null });
+            await loadClients();
+            openClient(id);
+          } catch (er) { btn.disabled = false; $('#callmsg', root).style.color = 'var(--danger)'; $('#callmsg', root).textContent = er.message; }
+        });
+        const del = $('#del', root);
+        if (del) del.addEventListener('click', async () => {
+          if (!confirm('Удалить клиента «' + c.name + '» безвозвратно?')) return;
+          try { await api('DELETE', '/api/admin/clients/' + encodeURIComponent(id)); close(); loadClients(); } catch (er) { alert(er.message); }
+        });
+      }
+
+      /* ---------- Сотрудники ---------- */
+      async function renderStaff() {
+        $('#main').innerHTML = '<div class="cr-empty">Загрузка…</div>';
+        let staff;
+        try { staff = (await api('GET', '/api/admin/staff')).staff; } catch (e) { $('#main').innerHTML = `<div class="cr-err">${esc(e.message)}</div>`; return; }
+        $('#main').innerHTML = `
+          ${flash || ''}
+          <section class="cr-panel">
+            <h2>Создать аккаунт сотрудника</h2>
+            <p>Менеджеры видят клиентов и могут отмечать звонки. Пароль можно задать самому или оставить пустым — тогда он создастся автоматически и будет показан один раз. При первом входе сотрудник обязан сменить пароль.</p>
+            <form class="cr-form" id="sform">
+              <label>Имя<input name="name" required maxlength="60" placeholder="Например, Мария"></label>
+              <label>Телефон (логин)<input name="phone" required placeholder="+7 900 000-00-00" inputmode="tel"></label>
+              <label>Роль<select name="role"><option value="manager">Менеджер</option><option value="admin">Администратор</option></select></label>
+              <label>Пароль (необязательно)<input name="password" type="text" autocomplete="off" placeholder="создать автоматически"></label>
+              <div><button class="cr-btn cr-btn--primary" type="submit">Создать</button></div>
+            </form>
+          </section>
+          <section class="cr-panel">
+            <h2>Сотрудники</h2><p>Отключённый сотрудник не сможет войти.</p>
+            <div class="cr-table-wrap"><table class="cr"><thead><tr><th>Имя</th><th>Телефон</th><th>Роль</th><th>Последний вход</th><th>Статус</th><th></th></tr></thead><tbody>
+            ${staff.map((s) => `<tr>
+              <td class="cr-name">${esc(s.name)}</td><td>${esc(s.phone)}</td><td>${esc(ROLE[s.role] || s.role)}</td>
+              <td>${s.lastLogin ? dt(s.lastLogin) : (s.mustChange ? 'ещё не входил' : '—')}</td>
+              <td><span class="pill ${s.active ? 'pill--interested' : 'pill--lost'}">${s.active ? 'Активен' : 'Отключён'}</span></td>
+              <td style="white-space:nowrap"><button class="cr-btn" data-reset="${esc(s.id)}">Сбросить пароль</button>
+                ${s.id !== me.id ? `<button class="cr-btn" data-toggle="${esc(s.id)}">${s.active ? 'Отключить' : 'Включить'}</button>` : ''}</td>
+            </tr>`).join('')}</tbody></table></div>
+          </section>`;
+        $('#sform').addEventListener('submit', async (e) => {
+          e.preventDefault(); const f = e.target;
+          try {
+            const r = await api('POST', '/api/admin/staff', { name: f.name.value, phone: f.phone.value, role: f.role.value, password: f.password.value });
+            flash = r.password
+              ? `<div class="cr-ok">Аккаунт создан. Временный пароль (виден только сейчас, передайте сотруднику): <span class="cr-pw">${esc(r.password)}</span></div>`
+              : '<div class="cr-ok">Аккаунт создан. При первом входе сотрудник должен сменить пароль.</div>';
+            renderStaff();
+          } catch (er) { flash = `<div class="cr-err">${esc(er.message)}</div>`; renderStaff(); }
+        });
+        document.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', async () => {
+          if (!confirm('Сбросить пароль сотрудника? Он будет выведен из системы.')) return;
+          try { const r = await api('POST', '/api/admin/staff/' + b.dataset.reset + '/reset'); flash = `<div class="cr-ok">Новый временный пароль: <span class="cr-pw">${esc(r.password)}</span> (виден только сейчас)</div>`; } catch (er) { flash = `<div class="cr-err">${esc(er.message)}</div>`; }
+          renderStaff();
+        }));
+        document.querySelectorAll('[data-toggle]').forEach((b) => b.addEventListener('click', async () => {
+          try { await api('POST', '/api/admin/staff/' + b.dataset.toggle + '/toggle'); } catch (er) { flash = `<div class="cr-err">${esc(er.message)}</div>`; }
+          renderStaff();
+        }));
+      }
+
+      /* ---------- Отзывы ---------- */
+      async function renderReviews() {
+        $('#main').innerHTML = '<div class="cr-empty">Загрузка…</div>';
+        let list;
+        try { list = (await api('GET', '/api/admin/reviews')).reviews; } catch (e) { $('#main').innerHTML = `<div class="cr-err">${esc(e.message)}</div>`; return; }
+        const label = { pending: 'На модерации', published: 'Опубликован', hidden: 'Скрыт' };
+        $('#main').innerHTML = `
+          <section class="cr-panel"><h2>Отзывы</h2><p>Новые отзывы клиентов появляются на сайте только после публикации. Примеры (sample) помечены на сайте как «Пример отзыва» и не влияют на рейтинг.</p>
+          ${list.length ? list.map((r) => `
+            <div class="cr-note" style="border-left-color:${r.status === 'pending' ? '#D9A441' : 'var(--border-strong)'}">
+              <small>${dt(r.createdAt)} · <b>${esc(r.name)}</b>${r.phone ? ' · ' + esc(r.phone) : ''} · <span style="color:#D9A441">${'★'.repeat(r.rating)}</span>${'☆'.repeat(5 - r.rating)} · <span class="pill">${esc(label[r.status] || r.status)}</span>${r.sample ? ' <span class="pill">пример</span>' : ''}</small>
+              <div style="margin:4px 0 8px">${esc(r.text)}</div>
+              ${r.status !== 'published' ? `<button class="cr-btn cr-btn--primary" data-rv="${esc(r.id)}" data-a="publish">Опубликовать</button>` : ''}
+              ${r.status === 'published' ? `<button class="cr-btn" data-rv="${esc(r.id)}" data-a="hide">Скрыть</button>` : ''}
+              <button class="cr-btn cr-btn--danger" data-rv="${esc(r.id)}" data-a="delete">Удалить</button>
+            </div>`).join('') : '<div class="cr-empty">Отзывов пока нет</div>'}
+          </section>`;
+        document.querySelectorAll('[data-rv]').forEach((b) => b.addEventListener('click', async () => {
+          if (b.dataset.a === 'delete' && !confirm('Удалить отзыв безвозвратно?')) return;
+          try { await api('POST', '/api/admin/reviews/' + b.dataset.rv, { action: b.dataset.a }); } catch (er) { alert(er.message); }
+          renderReviews();
+        }));
+      }
+
+      /* ---------- Журнал ---------- */
+      async function renderAudit() {
+        $('#main').innerHTML = '<div class="cr-empty">Загрузка…</div>';
+        let list;
+        try { list = (await api('GET', '/api/admin/audit')).audit; } catch (e) { $('#main').innerHTML = `<div class="cr-err">${esc(e.message)}</div>`; return; }
+        $('#main').innerHTML = `<section class="cr-panel"><h2>Журнал действий сотрудников</h2><p>Кто и что делал в панели — последние 300 записей. Журнал нельзя изменить из панели.</p>
+          <div class="cr-table-wrap"><table class="cr"><thead><tr><th>Время</th><th>Сотрудник</th><th>Действие</th></tr></thead><tbody>
+          ${list.map((a) => `<tr><td style="white-space:nowrap">${dt(a.t)}</td><td>${esc(a.byName)}</td><td>${esc(ACTION[a.action] || a.action)}${a.meta ? ' <span class="cr-sub">' + esc(JSON.stringify(a.meta)) + '</span>' : ''}</td></tr>`).join('')}
+          </tbody></table></div></section>`;
+      }
+
+      function show(t) {
+        tab = t; flash = flash && t === tab ? flash : null;
+        document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('is-active', b.dataset.tab === t));
+        ({ clients: loadClients, staff: renderStaff, reviews: renderReviews, audit: renderAudit })[t]();
+      }
+
+      async function boot() {
+        try { me = (await api('GET', '/api/me')).user; } catch (e) { return; }
+        if (!me || (me.role !== 'admin' && me.role !== 'manager')) { location.href = 'login.html?next=admin.html'; return; }
+        if (me.mustChange) { location.href = 'login.html?change=1'; return; }
+        $('#who').textContent = me.name + ' · ' + (ROLE[me.role] || '');
+        if (me.role === 'admin') {
+          document.querySelectorAll('[data-admin]').forEach((b) => { b.hidden = false; });
+          $('#catalog-link').hidden = false;
+        }
+        $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) { flash = null; show(b.dataset.tab); } });
+        $('#logout').addEventListener('click', async () => { try { await api('POST', '/api/logout'); } catch (e) { /* */ } location.href = 'login.html'; });
+        show('clients');
+      }
+      boot();
+    })();
   </script>
 </body>
 </html>

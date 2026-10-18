@@ -21,8 +21,8 @@
         <div id="crumbs"></div>
         <h1 class="page-hero__title">Заявка на ремонт</h1>
         <p class="page-hero__sub">
-          Перед отправкой вы увидите резюме выбранного ремонта. В демонстрационной версии
-          заявка сохраняется локально в вашем браузере.
+          Проверьте резюме выбранного ремонта и отправьте заявку — менеджер свяжется с вами
+          по указанному номеру телефона.
         </p>
       </div>
     </section>
@@ -40,6 +40,7 @@
   <script src="js/store.js"></script>
   <script src="js/estimate.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
     window.PAGE_KEY = 'request';
@@ -55,6 +56,19 @@
       ]);
 
       const root = document.getElementById('request-root');
+
+      function needLogin() {
+        root.innerHTML = UI.emptyState(
+          'Войдите, чтобы отправить заявку',
+          'Так мы сохраним вашу конфигурацию и сможем связаться с вами по номеру телефона.',
+          '<a class="btn btn--primary" href="login.html?next=request.html">Войти</a> <a class="btn btn--secondary" href="login.html?next=request.html#register">Регистрация</a>'
+        );
+      }
+      if (typeof Auth !== 'undefined' && !Auth.isLoggedIn()) {
+        needLogin();
+        document.addEventListener('auth:ready', () => { if (Auth.isLoggedIn()) location.reload(); });
+        return;
+      }
 
       if (!est) {
         root.innerHTML = UI.emptyState(
@@ -82,7 +96,7 @@
             </div>
             <div class="notice">
               <span class="notice__mark">i</span>
-              <span>Отправка на сервер не подключена. Заявка будет сохранена локально как демонстрационная. Расчёт по введённой площади не подтверждает наличие конкретной квартиры.</span>
+              <span>Расчёт предварительный и не является офертой. Расчёт по введённой площади не подтверждает наличие конкретной квартиры.</span>
             </div>
           </div>
 
@@ -109,7 +123,7 @@
               </div>
               <label class="checkbox" style="margin-bottom:var(--space-6)">
                 <input type="checkbox" id="req-consent">
-                <span>Я согласен на обработку персональных данных в соответствии с условиями сервиса *</span>
+                <span>Я согласен на обработку персональных данных в соответствии с <a href="privacy.html" target="_blank" rel="noopener">Политикой обработки персональных данных</a> *</span>
               </label>
               <div class="field has-error" id="consent-error" style="margin-bottom:var(--space-5)">
                 <span class="field__error">Необходимо согласие на обработку данных</span>
@@ -155,7 +169,11 @@
         return ok;
       }
 
-      form.addEventListener('submit', (e) => {
+      const me = (typeof Auth !== 'undefined' && Auth.current()) || {};
+      if (me.name) nameEl.value = me.name;
+      if (me.phone) phoneEl.value = me.phone;
+
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!validate()) {
           UI.toast('Проверьте правильность заполнения формы');
@@ -167,18 +185,30 @@
           phone: phoneEl.value.trim(),
           email: emailEl.value.trim(),
           comment: document.getElementById('req-comment').value.trim(),
-          config: Store.getConfig(),
+          complex: complex ? complex.name : '',
+          design: design ? design.name : '',
+          pkg: est.pkg.name,
+          area: est.apartment.area,
           total: est.total,
         };
-        Store.addRequest(request);
+        const btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        try {
+          await Auth.sendRequest(request);
+        } catch (err) {
+          btn.disabled = false;
+          if (err.status === 401) { needLogin(); return; }
+          UI.toast(err.message || 'Не удалось отправить заявку');
+          return;
+        }
 
         root.innerHTML = `
           <div class="empty-state" style="max-width:560px;margin:0 auto">
             <div class="empty-state__icon" aria-hidden="true">✓</div>
-            <div class="empty-state__title">Заявка сохранена</div>
+            <div class="empty-state__title">Спасибо! Заявка отправлена</div>
             <p class="empty-state__text">
-              Демонстрационная заявка сохранена локально в вашем браузере.
-              Отправка на сервер не подключена — это не уведомление о доставке менеджеру.
+              Менеджер увидит вашу заявку и свяжется с вами по номеру телефона. Ваши данные
+              остаются у нас и не передаются третьим лицам.
             </p>
             <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
               <a class="btn btn--primary" href="estimate.html">Вернуться к смете</a>

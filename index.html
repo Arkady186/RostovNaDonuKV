@@ -24,8 +24,8 @@
             <div class="hero__eyebrow">Дизайн и ремонт новостроек</div>
             <h1 class="hero__title">Квартира, в которой всё на своём месте</h1>
             <p class="hero__sub">
-              Выберите жилой комплекс, найдите свою планировку и соберите интерьер
-              с предварительным расчётом стоимости.
+              Выберите жилой комплекс, затем дизайн и комплектацию — и сразу увидите
+              предварительный расчёт стоимости.
             </p>
             <div class="hero__actions">
               <a class="btn btn--primary btn--lg" href="configurator.html">Подобрать ремонт</a>
@@ -46,7 +46,7 @@
                 <label class="quick-select__label" for="qs-complex">Жилой комплекс</label>
                 <select class="select" id="qs-complex"></select>
               </div>
-              <button class="btn btn--primary" id="qs-go" type="button">Выбрать квартиру</button>
+              <button class="btn btn--primary" id="qs-go" type="button">Выбрать ЖК</button>
             </div>
           </div>
           <div class="hero__media">
@@ -66,12 +66,12 @@
         <div class="section__head">
           <div>
             <div class="section__eyebrow">Каталог</div>
-            <h2 class="section__title">Жилые комплексы Ростова-на-Дону</h2>
-            <p class="section__sub">Каталог с первоисточниками застройщиков. Реальные планировки добавляются только после проверки; интерьерные изображения помечены отдельно.</p>
+            <h2 class="section__title">Выберите жилой комплекс</h2>
+            <p class="section__sub">Реальные новостройки Ростова-на-Дону с фото и данными с сайтов застройщиков. Нажмите на ЖК, чтобы продолжить.</p>
           </div>
-          <a class="btn btn--secondary section__action" href="complexes.html">Весь каталог</a>
+          <a class="btn btn--secondary section__action" href="complexes.html">Все ЖК по застройщикам</a>
         </div>
-        <div class="grid grid--auto" id="home-complexes"></div>
+        <div class="cx-grid" id="home-complexes"></div>
       </div>
     </section>
 
@@ -80,24 +80,23 @@
       <div class="container">
         <div class="grid grid--2" style="align-items:center;gap:var(--space-9)">
           <div>
-            <img src="https://img1.creatium.ru/disk2/2a/3b/da/03faf78067ece3d201384444331345e52f/01jn0qz7z45vma0s99zhbw0gzc.jpg"
-                 alt="Визуализация ЖК «Октябрь Парк» с официального сайта проекта" style="border-radius:var(--radius);aspect-ratio:4/3;object-fit:cover;width:100%;box-shadow:var(--shadow-md)" loading="lazy">
-            <p class="source-note">Визуализация с официальной страницы проекта · <a href="https://oktyabrskiipark.ru/" target="_blank" rel="noopener noreferrer">источник ↗</a></p>
+            <img id="op-img" src="" alt="ЖК «Октябрь Парк»" style="border-radius:var(--radius);aspect-ratio:4/3;object-fit:cover;width:100%;box-shadow:var(--shadow-md)" loading="lazy">
           </div>
           <div>
-            <div class="section__eyebrow">Приоритетный объект</div>
+            <div class="section__eyebrow">Популярный выбор</div>
             <h2 class="section__title">ЖК «Октябрь Парк»</h2>
             <p class="section__sub" style="margin-top:var(--space-4)">
-              Жилой комплекс комфорт+ от ССК по адресу ул. Таганрогская, 132/4. Актуальные корпуса, планировки и цены проверяйте на официальном сайте застройщика. После загрузки подтверждённой планировки можно будет рассчитать ремонт.
+              Монолитный жилой комплекс комфорт-класса от ССК на ул. Таганрогской.
+              Просторные кухни и кухни-гостиные, подземный паркинг, школа рядом.
+              Посчитайте мебель и ремонт для вашей квартиры.
             </p>
             <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-5)">
-              <span class="badge badge--sand">Комфорт+</span>
-              <span class="badge badge--outline">ССК</span>
+              <span class="badge badge--sand">Комфорт-класс</span>
+              <span class="badge badge--outline">Монолит</span>
               <span class="badge badge--outline">Ростов-на-Дону</span>
-              <a class="badge badge--outline" href="https://oktyabrskiipark.ru/" target="_blank" rel="noopener noreferrer">Официальный сайт ЖК ↗</a>
             </div>
             <div class="hero__actions">
-              <a class="btn btn--primary" href="https://oktyabrskiipark.ru/" target="_blank" rel="noopener noreferrer">Проверить квартиры у застройщика ↗</a>
+              <a class="btn btn--primary" href="configurator.html?complex=oktyabr-park">Рассчитать ремонт</a>
               <a class="btn btn--secondary" href="complex.html?slug=oktyabr-park">Подробнее о ЖК</a>
             </div>
           </div>
@@ -110,9 +109,9 @@
       <div class="container">
         <div class="section__head">
           <div>
-            <div class="section__eyebrow">Планировки</div>
+            <div class="section__eyebrow">Квартиры</div>
             <h2 class="section__title">Категории квартир</h2>
-            <p class="section__sub">От компактной студии до просторной трёхкомнатной — для каждой категории есть демонстрационные планировки.</p>
+            <p class="section__sub">От компактной студии до просторной трёхкомнатной — выберите ЖК и введите площадь своей квартиры.</p>
           </div>
         </div>
         <div class="grid grid--auto-sm" id="home-types"></div>
@@ -195,6 +194,7 @@
   <script src="js/store.js"></script>
   <script src="js/estimate.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/main.js"></script>
   <script>
     window.PAGE_KEY = 'index';
@@ -238,7 +238,7 @@
       qsGo.addEventListener('click', () => {
         const complex = catalog.complexes.find((c) => c.id === qsComplex.value);
         if (complex) {
-          window.location.href = 'apartments.html?complex=' + encodeURIComponent(complex.slug);
+          window.location.href = 'complex.html?slug=' + encodeURIComponent(complex.slug);
         } else {
           window.location.href = 'complexes.html';
         }
@@ -247,38 +247,20 @@
       fillCities();
       fillDevelopers();
 
-      /* ---------- Подборка ЖК ---------- */
-      const complexesEl = document.getElementById('home-complexes');
-      const complexes = catalog.complexes
+      /* ---------- Выбор ЖК ---------- */
+      const cityComplexes = catalog.complexes
         .filter((c) => c.published && c.cityId === cityId)
-        .sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0))
-        .slice(0, 3);
-
-      complexesEl.innerHTML = complexes
-        .map((c) => {
-          const dev = catalog.developers.find((d) => d.id === c.developerId);
-          return `
-          <article class="card card--link">
-            <div class="card__media">
-              <img class="card__img" src="${c.image}" alt="${UI.escapeHtml(c.name)}" loading="lazy">
-                <span class="photo-credit">${c.imageKind === 'official' ? 'Материал с сайта застройщика' : 'Иллюстрация, не фото ЖК'}</span>
-              ${c.demo ? '<span class="badge badge--demo card__media-badge">Демо-данные</span>' : ''}
-              <button class="card__fav ${Store.isFavorite('complexes', c.id) ? 'is-active' : ''}" data-fav="complexes" data-id="${c.id}" aria-label="В избранное">♡</button>
-            </div>
-            <div class="card__body">
-              <h3 class="card__title"><a href="complex.html?slug=${c.slug}">${UI.escapeHtml(c.name)}</a></h3>
-              <div class="card__meta">
-                <span class="tag">${UI.escapeHtml(dev ? dev.name : '')}</span>
-                <span class="tag">${UI.escapeHtml(c.class)}</span>
-              </div>
-              <p class="card__text">${UI.escapeHtml(c.description.slice(0, 110))}…</p>
-              <div class="card__footer">
-                <a class="btn btn--primary btn--sm" href="apartments.html?complex=${c.slug}">Выбрать квартиру</a>
-              </div>
-            </div>
-          </article>`;
-        })
+        .sort((x, y) => (y.priority ? 1 : 0) - (x.priority ? 1 : 0));
+      document.getElementById('home-complexes').innerHTML = cityComplexes
+        .map((c) => UI.complexTile(c, catalog.developers.find((d) => d.id === c.developerId)))
         .join('');
+      const opComplex = catalog.complexes.find((c) => c.slug === 'oktyabr-park' && c.published);
+      const opSection = document.getElementById('oktyabr-park');
+      if (opComplex) {
+        document.getElementById('op-img').src = opComplex.image;
+      } else if (opSection) {
+        opSection.hidden = true;
+      }
 
       /* ---------- Категории квартир ---------- */
       const typesEl = document.getElementById('home-types');
@@ -295,8 +277,8 @@
           return `
           <a class="select-card" href="complexes.html" style="text-decoration:none">
             <div class="select-card__title">${info.label}</div>
-            <div class="select-card__text">${t.area} · демонстрационные планировки в каталоге</div>
-            <div class="select-card__price">Смотреть ЖК →</div>
+            <div class="select-card__text">${t.area} · расчёт по площади вашей квартиры</div>
+            <div class="select-card__price">Выбрать ЖК →</div>
           </a>`;
         })
         .join('');

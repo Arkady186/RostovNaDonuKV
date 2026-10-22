@@ -16,38 +16,137 @@
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body class="home">
+  <div class="h-progress" id="h-progress" aria-hidden="true"></div>
   <div id="app-header"></div>
 
   <main>
     <!-- ===== Первый экран ===== -->
-    <section class="h-hero">
+    <section class="h-hero" id="top">
+      <span class="h-blob h-blob--a" aria-hidden="true"></span>
+      <span class="h-blob h-blob--b" aria-hidden="true"></span>
       <div class="container">
         <div class="h-hero__grid">
           <div class="h-hero__text">
             <span class="h-pill" data-reveal><i></i>Дизайн и ремонт новостроек · Ростов-на-Дону</span>
-            <h1 class="h-hero__title" data-reveal style="--i:1">
-              Квартира, в&nbsp;которой всё на&nbsp;<em>своём месте<svg class="h-underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 60 2, 120 13, 180 6 S 270 4, 297 8"/></svg></em>
+            <h1 class="h-hero__title" id="h-title">
+              <span class="w"><span style="--d:0">Квартира,</span></span>
+              <span class="w"><span style="--d:1">в&nbsp;которой</span></span>
+              <span class="w"><span style="--d:2">всё&nbsp;на</span></span>
+              <span class="w w--em"><span style="--d:3"><em>своём месте<svg class="h-underline" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 9 C 60 2, 120 13, 180 6 S 270 4, 297 8"/></svg></em></span></span>
             </h1>
-            <p class="h-hero__lead" data-reveal style="--i:2">
+            <p class="h-hero__lead" data-reveal style="--i:3">
               Выберите жилой комплекс, затем дизайн и&nbsp;комплектацию&nbsp;— и&nbsp;сразу увидите
-              предварительный расчёт стоимости. Без звонков и ожидания.
+              предварительный расчёт стоимости. Без звонков и&nbsp;ожидания.
             </p>
-            <div class="h-hero__cta" data-reveal style="--i:3">
+            <div class="h-hero__cta" data-reveal style="--i:4">
               <a class="h-btn h-btn--dark" href="#catalog">Выбрать ЖК
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
               <a class="h-btn h-btn--line" href="designs.html">Смотреть проекты</a>
             </div>
-            <dl class="h-stats" data-reveal style="--i:4">
+            <dl class="h-stats" data-reveal style="--i:5">
               <div class="h-stat"><dt><span data-count="10">10</span></dt><dd>жилых комплексов</dd></div>
               <div class="h-stat"><dt><span data-count="3">3</span></dt><dd>застройщика</dd></div>
               <div class="h-stat"><dt><span data-count="6">6</span></dt><dd>стилей интерьера</dd></div>
             </dl>
           </div>
 
-          <div class="h-visual" data-reveal style="--i:2">
+          <!-- Живая «студия интерьера»: стиль переключается, комната перекрашивается -->
+          <div class="h-visual" id="studio" data-reveal style="--i:2">
             <div class="h-ring" aria-hidden="true"></div>
-            <div class="h-arch" id="h-arch"><img id="h-hero-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80" alt="Современная кухня-гостиная в тёплых натуральных оттенках" loading="eager"></div>
-            <div class="h-round"><img id="h-round-img" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=700&q=80" alt="Светлая гостиная" loading="lazy"></div>
+            <div class="h-arch" id="h-arch">
+              <svg class="h-room" viewBox="0 0 600 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <linearGradient id="rg-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+                  <radialGradient id="rg-glow"><stop offset="0" stop-color="#FFF3D4" stop-opacity=".95"/><stop offset="1" stop-color="#FFF3D4" stop-opacity="0"/></radialGradient>
+                  <linearGradient id="rg-shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient>
+                  <linearGradient id="rg-sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+                </defs>
+                <!-- стена и пол -->
+                <rect class="p1" width="600" height="540"/>
+                <rect width="600" height="540" fill="url(#rg-shade)"/>
+                <rect class="p2" y="410" width="600" height="130" opacity=".5"/>
+                <path class="s3" d="M0 410H600" opacity=".35" stroke-width="2"/>
+                <rect class="p2" y="540" width="600" height="220"/>
+                <path class="s3" d="M0 580H600M0 630H600M0 690H600M0 756H600" opacity=".16" stroke-width="2"/>
+                <rect y="540" width="600" height="14" fill="#000" opacity=".06"/>
+
+                <!-- окно-арка и свет -->
+                <path d="M60 536V250a80 80 0 0 1 160 0V536Z" fill="#FFF8EA"/>
+                <path d="M60 536V250a80 80 0 0 1 160 0V536Z" fill="url(#rg-sheen)"/>
+                <path class="s4" d="M140 170V536M60 340H220M60 440H220" stroke-width="6" opacity=".9"/>
+                <path class="s4" d="M60 536V250a80 80 0 0 1 160 0V536Z" fill="none" stroke-width="10"/>
+                <path class="beam" d="M60 536H220L470 760H-170Z" fill="url(#rg-beam)"/>
+                <g class="dust" fill="#fff">
+                  <circle cx="150" cy="590" r="2.2"/><circle cx="210" cy="640" r="1.6"/><circle cx="120" cy="660" r="2"/><circle cx="260" cy="700" r="1.5"/><circle cx="180" cy="720" r="2.4"/><circle cx="90" cy="610" r="1.4"/>
+                </g>
+
+                <!-- картины -->
+                <rect class="p4" x="345" y="190" width="116" height="166" rx="3"/>
+                <rect class="p1" x="357" y="202" width="92" height="142"/>
+                <circle class="p3" cx="403" cy="262" r="28"/>
+                <path class="p4" d="M357 344V316q30-42 58-8t34 4v32z" opacity=".92"/>
+                <rect class="p4" x="480" y="236" width="64" height="94" rx="3"/>
+                <rect class="p2" x="488" y="244" width="48" height="78"/>
+                <path class="s4" d="M488 306q24-40 48 0M488 322q24-26 48 0" fill="none" stroke-width="2.5"/>
+
+                <!-- подвесной светильник -->
+                <g class="sway">
+                  <path class="s4" d="M300 0V212" stroke-width="3"/>
+                  <circle cx="300" cy="262" r="64" fill="url(#rg-glow)" class="glow"/>
+                  <path class="p4" d="M258 256Q258 214 300 212Q342 214 342 256Z"/>
+                  <ellipse cx="300" cy="256" rx="42" ry="5" fill="#FFF3D4"/>
+                </g>
+
+                <!-- ковёр -->
+                <ellipse class="p3" cx="330" cy="650" rx="262" ry="56" opacity=".34"/>
+                <ellipse class="p2" cx="330" cy="650" rx="210" ry="40" opacity=".75"/>
+                <ellipse class="s3" cx="330" cy="650" rx="176" ry="30" fill="none" stroke-width="2" opacity=".35"/>
+
+                <!-- диван -->
+                <ellipse cx="330" cy="566" rx="178" ry="14" fill="#000" opacity=".16"/>
+                <rect class="p4" x="188" y="546" width="10" height="20" rx="2"/>
+                <rect class="p4" x="462" y="546" width="10" height="20" rx="2"/>
+                <rect class="p3" x="196" y="426" width="268" height="108" rx="36"/>
+                <rect class="p3" x="170" y="486" width="320" height="62" rx="24"/>
+                <rect width="320" height="62" x="170" y="486" rx="24" fill="#000" opacity=".07"/>
+                <rect class="p3" x="160" y="458" width="48" height="94" rx="23"/>
+                <rect x="160" y="458" width="48" height="94" rx="23" fill="#000" opacity=".1"/>
+                <rect class="p3" x="452" y="458" width="48" height="94" rx="23"/>
+                <rect x="452" y="458" width="48" height="94" rx="23" fill="#000" opacity=".1"/>
+                <rect class="p2" x="226" y="450" width="80" height="72" rx="22"/>
+                <rect class="p1" x="318" y="458" width="76" height="66" rx="22" transform="rotate(5 356 490)"/>
+                <path class="s3" d="M242 466q24 10 48 0" fill="none" stroke-width="2" opacity=".5"/>
+
+                <!-- журнальный столик -->
+                <ellipse cx="330" cy="676" rx="62" ry="10" fill="#000" opacity=".14"/>
+                <rect class="p4" x="323" y="636" width="14" height="40" rx="3"/>
+                <ellipse class="p4" cx="330" cy="634" rx="92" ry="16"/>
+                <ellipse cx="330" cy="631" rx="92" ry="14" fill="#fff" opacity=".12"/>
+                <rect class="p1" x="296" y="618" width="48" height="8" rx="2"/>
+                <rect class="p3" x="302" y="611" width="38" height="7" rx="2"/>
+                <path fill="#68735C" d="M356 624q-4-24 8-30 6 12-2 30z"/>
+                <rect class="p2" x="350" y="620" width="18" height="12" rx="4"/>
+
+                <!-- растение -->
+                <path class="p4" d="M88 546h54l-6 44H94z"/>
+                <g fill="#68735C" class="plant">
+                  <g class="leaf" style="--r:-46deg;--t:0s"><ellipse cx="115" cy="504" rx="12" ry="40" fill="#56624b"/></g>
+                  <g class="leaf" style="--r:-24deg;--t:.6s"><ellipse cx="115" cy="486" rx="14" ry="58"/></g>
+                  <g class="leaf" style="--r:-4deg;--t:1.1s"><ellipse cx="115" cy="470" rx="15" ry="74" fill="#7c8a6c"/></g>
+                  <g class="leaf" style="--r:20deg;--t:.3s"><ellipse cx="115" cy="484" rx="14" ry="60"/></g>
+                  <g class="leaf" style="--r:44deg;--t:.9s"><ellipse cx="115" cy="504" rx="12" ry="42" fill="#56624b"/></g>
+                </g>
+
+                <!-- приставной столик с веткой -->
+                <ellipse cx="548" cy="580" rx="26" ry="5" fill="#000" opacity=".14"/>
+                <ellipse class="p4" cx="548" cy="512" rx="34" ry="8"/>
+                <rect class="p4" x="545" y="512" width="6" height="64"/>
+                <ellipse class="p4" cx="548" cy="576" rx="22" ry="5"/>
+                <path class="p2" d="M538 504q-6-14 0-26h20q6 12 0 26z"/>
+                <path class="s4" d="M548 480q-4-34-26-58M548 480q6-40 22-66M548 480q-1-30 2-52" fill="none" stroke-width="2.4"/>
+                <g fill="#68735C"><circle cx="522" cy="424" r="5"/><circle cx="570" cy="416" r="5.5"/><circle cx="550" cy="430" r="4.5"/><circle cx="534" cy="446" r="4"/><circle cx="560" cy="448" r="4"/></g>
+              </svg>
+            </div>
 
             <div class="h-seal" aria-hidden="true">
               <svg class="t" viewBox="0 0 100 100"><defs><path id="seal-p" d="M50 50 m-38 0 a38 38 0 1 1 76 0 a38 38 0 1 1 -76 0"/></defs><text><textPath href="#seal-p">смета за 4 шага ✦ ремонт без сюрпризов ✦</textPath></text></svg>
@@ -65,14 +164,16 @@
               <div class="h-est__bar"><i></i></div>
             </div>
 
-            <div class="h-float h-chip" aria-hidden="true">
-              <span class="h-chip__dots"><i style="background:#F0E9DE"></i><i style="background:#C9B79A"></i><i style="background:#8C7A63"></i><i style="background:#3A352E"></i></span>
-              <span><small>Направления</small><b>6 стилей интерьера</b></span>
+            <div class="h-float h-tag">
+              <small>Стиль интерьера</small>
+              <b id="st-name">Soft Minimal</b>
+              <span id="st-mat">Шпон дуба · Микроцемент · Лён</span>
+              <div class="h-sws" id="st-sws" role="group" aria-label="Выбрать стиль"></div>
             </div>
           </div>
         </div>
       </div>
-      <a class="h-scroll" href="#how" aria-label="Прокрутить вниз"><i></i>Листайте</a>
+      <a class="h-scroll" href="#catalog" aria-label="Прокрутить вниз"><i></i>Листайте</a>
     </section>
 
     <!-- ===== Бегущая строка ===== -->
@@ -96,62 +197,72 @@
       </div>
     </section>
 
-    <!-- ===== Как это работает ===== -->
-    <section class="h-sec" id="how">
+    <!-- ===== Манифест: слова загораются при прокрутке ===== -->
+    <section class="h-sec h-statement">
       <div class="container">
-        <div class="h-head">
-          <div data-reveal>
+        <div class="h-eyebrow" data-reveal>Наш подход</div>
+        <p class="h-stmt" id="h-stmt">Мы не продаём ремонт вслепую. Вы сами выбираете жилой комплекс, стиль и&nbsp;комплектацию&nbsp;— и&nbsp;видите <em>понятную смету</em> раньше, чем вам кто-то позвонит.</p>
+      </div>
+    </section>
+
+    <!-- ===== Как это работает ===== -->
+    <section class="h-sec h-sec--tight" id="how">
+      <div class="container">
+        <div class="h-how">
+          <div class="h-how__side" data-reveal>
             <div class="h-eyebrow">Процесс</div>
             <h2 class="h-title">Четыре шага до&nbsp;<em>предварительной</em> сметы</h2>
+            <p class="h-lead">От выбора планировки до разбивки по&nbsp;работам и&nbsp;материалам&nbsp;— за&nbsp;несколько минут.</p>
+            <a class="h-btn h-btn--dark" href="configurator.html" style="margin-top:30px">Подобрать ремонт
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           </div>
-          <a class="h-btn h-btn--line" href="how-it-works.html" data-reveal>Подробнее</a>
+          <div class="h-steps" id="h-steps"></div>
         </div>
-        <div class="h-steps" id="h-steps"></div>
       </div>
     </section>
 
     <!-- ===== Популярный выбор ===== -->
     <section class="h-sec h-sec--tight" id="oktyabr-park">
       <div class="container">
-        <div class="h-feature">
-          <div class="h-feature__media" data-reveal>
-            <span class="h-feature__badge">Популярный выбор</span>
-            <div class="h-feature__img"><img id="op-img" src="" alt="ЖК «Октябрь Парк»" loading="lazy"></div>
-            <div class="h-feature__card"><small>Застройщик</small><b>ССК</b><span>ул. Таганрогская, 132/4</span></div>
-          </div>
-          <div class="h-feature__text" data-reveal style="--i:1">
+        <div class="h-op" data-reveal>
+          <div class="h-op__img"><img id="op-img" src="" alt="ЖК «Октябрь Парк»" loading="lazy" data-parallax="0.07"></div>
+          <span class="h-op__badge">★ Популярный выбор</span>
+          <div class="h-op__body">
             <div class="h-eyebrow">Новостройка недели</div>
-            <h2 class="h-title">ЖК «Октябрь&nbsp;<em>Парк</em>»</h2>
-            <p class="h-lead">Монолитный жилой комплекс комфорт-класса от ССК. Просторные кухни и&nbsp;кухни-гостиные, подземный паркинг, школа рядом. Посчитайте мебель и&nbsp;ремонт для вашей квартиры.</p>
-            <ul class="h-facts">
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Комфорт-класс</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Монолитный дом</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Подземный паркинг</li>
-              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Школа в шаговой доступности</li>
+            <h2 class="h-op__title">ЖК «Октябрь <em>Парк</em>»</h2>
+            <p>Монолитный жилой комплекс комфорт-класса от&nbsp;ССК на&nbsp;ул.&nbsp;Таганрогской. Просторные кухни и&nbsp;кухни-гостиные, подземный паркинг, школа рядом.</p>
+            <ul class="h-op__facts">
+              <li>Комфорт-класс</li><li>Монолит</li><li>Подземный паркинг</li><li>Школа рядом</li>
             </ul>
-            <div class="h-hero__cta">
-              <a class="h-btn h-btn--dark" href="configurator.html?complex=oktyabr-park">Рассчитать ремонт
+            <div class="h-op__cta">
+              <a class="h-btn h-btn--cream" href="configurator.html?complex=oktyabr-park">Рассчитать ремонт
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-              <a class="h-btn h-btn--line" href="complex.html?slug=oktyabr-park">Подробнее о ЖК</a>
+              <a class="h-btn h-btn--ghost" href="complex.html?slug=oktyabr-park">Подробнее о ЖК</a>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===== Дизайн-проекты ===== -->
+    <!-- ===== Дизайн-проекты: горизонтальная лента ===== -->
     <section class="h-sec h-designs" id="designs">
       <div class="container">
         <div class="h-head">
           <div data-reveal>
             <div class="h-eyebrow">Дизайн-проекты</div>
-            <h2 class="h-title">Готовые направления <em>интерьера</em></h2>
-            <p class="h-lead">Шесть проработанных стилей с&nbsp;палитрами, материалами и&nbsp;ориентировочным уровнем бюджета.</p>
+            <h2 class="h-title">Шесть направлений <em>интерьера</em></h2>
+            <p class="h-lead">Проработанные стили с&nbsp;палитрами, материалами и&nbsp;ориентировочным уровнем бюджета. Листайте&nbsp;→</p>
           </div>
-          <a class="h-btn h-btn--ghost" href="designs.html" data-reveal>Все проекты</a>
+          <div class="h-rail__ctrl" data-reveal>
+            <button class="h-arrow" id="h-prev" type="button" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+            <button class="h-arrow" id="h-next" type="button" aria-label="Вперёд"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
         </div>
-        <div class="h-dgrid" id="h-designs" data-reveal></div>
       </div>
+      <div class="h-rail" id="h-rail">
+        <div class="h-rail__track" id="h-designs"></div>
+      </div>
+      <div class="container"><div class="h-rail__bar" aria-hidden="true"><i id="h-rail-bar"></i></div></div>
     </section>
 
     <!-- ===== Преимущества ===== -->
@@ -171,7 +282,7 @@
               <p>Работы, черновые и&nbsp;чистовые материалы, кухня, опции и&nbsp;прочие расходы&nbsp;— отдельными строками.</p>
             </div>
             <div class="h-split">
-              <div>Работы<span style="--k:0;--w:78%"><i style="--k:0"></i></span></div>
+              <div>Работы<span style="--w:78%"><i style="--k:0"></i></span></div>
               <div>Материалы<span style="--w:62%"><i style="--k:1"></i></span></div>
               <div>Кухня<span style="--w:46%"><i style="--k:2"></i></span></div>
               <div>Опции<span style="--w:24%"><i style="--k:3"></i></span></div>
@@ -215,7 +326,7 @@
     </section>
 
     <!-- ===== FAQ ===== -->
-    <section class="h-sec">
+    <section class="h-sec" style="padding-top:0">
       <div class="container">
         <div class="h-faq">
           <div class="h-faq__side" data-reveal>
@@ -233,8 +344,8 @@
     <section class="h-sec h-sec--tight" style="padding-top:0">
       <div class="container">
         <div class="h-cta" data-reveal>
-          <span class="h-cta__arch h-cta__arch--l" aria-hidden="true"></span>
-          <span class="h-cta__arch h-cta__arch--r" aria-hidden="true"></span>
+          <span class="h-cta__word" aria-hidden="true">КВАДРАТ</span>
+          <div class="h-eyebrow" style="color:var(--clay)">Готовы начать?</div>
           <h2>Начните с&nbsp;планировки&nbsp;— остальное <em>соберём вместе</em></h2>
           <p>Конфигуратор сохраняет выбор на&nbsp;каждом шаге: квартира, дизайн, комплектация, материалы и&nbsp;опции. Смета пересчитывается автоматически.</p>
           <div class="h-cta__btns">
